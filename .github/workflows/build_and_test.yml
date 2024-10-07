@@ -1,4 +1,4 @@
-name: PolySynth
+name: SYNTH_TEMPLATE
 
 on:
   workflow_dispatch: # lets you run a build from the UI
