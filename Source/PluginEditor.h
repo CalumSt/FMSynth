@@ -12,11 +12,11 @@
 #include "PluginProcessor.h"
 
 //==============================================================================
-class JX11AudioProcessorEditor  : public juce::AudioProcessorEditor
+class SynthAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
 public:
-    JX11AudioProcessorEditor (JX11AudioProcessor&);
-    ~JX11AudioProcessorEditor() override;
+    SynthAudioProcessorEditor (SynthAudioProcessor&);
+    ~SynthAudioProcessorEditor() override;
 
     //==============================================================================
     void paint (juce::Graphics&) override;
@@ -25,6 +25,6 @@ public:
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    JX11AudioProcessor& audioProcessor;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JX11AudioProcessorEditor)
+    SynthAudioProcessor& audioProcessor;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthAudioProcessorEditor)
 };

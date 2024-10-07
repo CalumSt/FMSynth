@@ -10,15 +10,15 @@
 #include <JuceHeader.h>
 #include <foleys_gui_magic/General/foleys_MagicProcessor.h>
 //==============================================================================
-class JX11AudioProcessor : public foleys::MagicProcessor, juce::ValueTree::Listener
+class SynthAudioProcessor : public foleys::MagicProcessor, juce::ValueTree::Listener
 {
 public:
     //==============================================================================
     juce::AudioProcessorValueTreeState parameterTree { *this, nullptr, "Parameters", createParameterLayout() };
 
     //==============================================================================
-    JX11AudioProcessor();
-    ~JX11AudioProcessor() override;
+    SynthAudioProcessor();
+    ~SynthAudioProcessor() override;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -82,5 +82,5 @@ private:
     foleys::MagicPlotSource* oscilloscope = nullptr;
     foleys::MagicPlotSource* analyser = nullptr;
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (JX11AudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthAudioProcessor)
 };

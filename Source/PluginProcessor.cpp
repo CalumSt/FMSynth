@@ -11,7 +11,7 @@
 #include <cstdint>
 
 //==============================================================================
-JX11AudioProcessor::JX11AudioProcessor()
+SynthAudioProcessor::SynthAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
     : foleys::MagicProcessor (juce::AudioProcessor::BusesProperties()
     #if !JucePlugin_IsMidiEffect
@@ -26,18 +26,18 @@ JX11AudioProcessor::JX11AudioProcessor()
     parameterTree.state.addListener(this);
 }
 
-JX11AudioProcessor::~JX11AudioProcessor()
+SynthAudioProcessor::~SynthAudioProcessor()
 {
     parameterTree.state.removeListener(this);
 }
 
 //==============================================================================
-const juce::String JX11AudioProcessor::getName() const
+const juce::String SynthAudioProcessor::getName() const
 {
     return JucePlugin_Name;
 }
 
-bool JX11AudioProcessor::acceptsMidi() const
+bool SynthAudioProcessor::acceptsMidi() const
 {
    #if JucePlugin_WantsMidiInput
     return true;
@@ -46,7 +46,7 @@ bool JX11AudioProcessor::acceptsMidi() const
    #endif
 }
 
-bool JX11AudioProcessor::producesMidi() const
+bool SynthAudioProcessor::producesMidi() const
 {
    #if JucePlugin_ProducesMidiOutput
     return true;
@@ -55,7 +55,7 @@ bool JX11AudioProcessor::producesMidi() const
    #endif
 }
 
-bool JX11AudioProcessor::isMidiEffect() const
+bool SynthAudioProcessor::isMidiEffect() const
 {
    #if JucePlugin_IsMidiEffect
     return true;
@@ -64,37 +64,37 @@ bool JX11AudioProcessor::isMidiEffect() const
    #endif
 }
 
-double JX11AudioProcessor::getTailLengthSeconds() const
+double SynthAudioProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int JX11AudioProcessor::getNumPrograms()
+int SynthAudioProcessor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
                 // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int JX11AudioProcessor::getCurrentProgram()
+int SynthAudioProcessor::getCurrentProgram()
 {
     return 0;
 }
 
-void JX11AudioProcessor::setCurrentProgram (int index)
+void SynthAudioProcessor::setCurrentProgram (int index)
 {
 }
 
-const juce::String JX11AudioProcessor::getProgramName (int index)
+const juce::String SynthAudioProcessor::getProgramName (int index)
 {
     return {};
 }
 
-void JX11AudioProcessor::changeProgramName (int index, const juce::String& newName)
+void SynthAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
 }
 
 //==============================================================================
-void JX11AudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void SynthAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     parametersChanged.store(true);
 
@@ -104,16 +104,16 @@ void JX11AudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     analyser->prepareToPlay (sampleRate, samplesPerBlock);
 }
 
-void JX11AudioProcessor::releaseResources()
+void SynthAudioProcessor::releaseResources()
 {
 }
 
-void JX11AudioProcessor::reset()
+void SynthAudioProcessor::reset()
 {
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool JX11AudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool SynthAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
   #if JucePlugin_IsMidiEffect
     juce::ignoreUnused (layouts);
@@ -138,7 +138,7 @@ bool JX11AudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) con
 }
 #endif
 
-void JX11AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessageList)
+void SynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessageList)
 {
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
@@ -156,21 +156,21 @@ void JX11AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::M
 }
 
 //==============================================================================
-void JX11AudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+void SynthAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
 }
 
-void JX11AudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void SynthAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 }
 
 //==============================================================================
-juce::AudioProcessorValueTreeState::ParameterLayout JX11AudioProcessor::createParameterLayout() {
+juce::AudioProcessorValueTreeState::ParameterLayout SynthAudioProcessor::createParameterLayout() {
 
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
@@ -187,7 +187,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout JX11AudioProcessor::createPa
 }
 
 //==============================================================================
-void JX11AudioProcessor::splitBufferByEvents(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessageList)
+void SynthAudioProcessor::splitBufferByEvents(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessageList)
 {
     int bufferOffset = 0;
 
@@ -215,7 +215,7 @@ void JX11AudioProcessor::splitBufferByEvents(juce::AudioBuffer<float>& buffer, j
     
 }
 
-void JX11AudioProcessor::handleMidi(uint8_t data0, uint8_t data1, uint8_t data2)
+void SynthAudioProcessor::handleMidi(uint8_t data0, uint8_t data1, uint8_t data2)
 /*
  * Handles incoming MIDI messages.
  *
@@ -239,7 +239,7 @@ void JX11AudioProcessor::handleMidi(uint8_t data0, uint8_t data1, uint8_t data2)
 
             // If velocity is non-zero, turn on the note; otherwise, turn it off
             // Extract the velocity is done implicitly
-            if (uint8_t velo = data2 & 0x7F; velo > 0) {
+            if (uint8_t velocity = data2 & 0x7F; velocity > 0) {
                 // NOTE ON FUNCTION GOES HERE
             } else {
                 // NOTE OFF FUNCTION GOES HERE
@@ -262,12 +262,12 @@ void JX11AudioProcessor::handleMidi(uint8_t data0, uint8_t data1, uint8_t data2)
     }
 }
 
-void JX11AudioProcessor::render(juce::AudioBuffer<float>& buffer, int sampleCount, int bufferOffset)
+void SynthAudioProcessor::render(juce::AudioBuffer<float>& buffer, int sampleCount, int bufferOffset)
 {
     // Plugin processing goes here
 }
 
-void JX11AudioProcessor::update()
+void SynthAudioProcessor::update()
 {
     // This method interfaces changes to the parameter tree to the synth engine
     auto sampleRate = float(getSampleRate());
@@ -282,5 +282,5 @@ void JX11AudioProcessor::update()
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new JX11AudioProcessor();
+    return new SynthAudioProcessor();
 }
