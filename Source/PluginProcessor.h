@@ -8,9 +8,8 @@
 
 #pragma once
 #include <JuceHeader.h>
-#include <foleys_gui_magic/General/foleys_MagicProcessor.h>
 //==============================================================================
-class SynthAudioProcessor : public foleys::MagicProcessor, juce::ValueTree::Listener
+class SynthAudioProcessor : public juce::AudioProcessor, public juce::ValueTree::Listener
 {
 public:
     //==============================================================================
@@ -32,7 +31,8 @@ public:
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
 
     //==============================================================================
-
+    juce::AudioProcessorEditor* createEditor() override;
+    bool hasEditor() const override;
     //==============================================================================
     const juce::String getName() const override;
 
@@ -67,7 +67,6 @@ private:
 
 
     //==============================================================================
-    private:
     std::atomic<bool> parametersChanged { false }; // Use an atomic bool to check for any parameter changes
 
     void valueTreePropertyChanged(juce::ValueTree&, const juce::Identifier&) override
@@ -77,10 +76,6 @@ private:
 
     void update();
 
-    // GUI MAGIC: define that as last member of your AudioProcessor
-    foleys::MagicLevelSource* outputMeter = nullptr;
-    foleys::MagicPlotSource* oscilloscope = nullptr;
-    foleys::MagicPlotSource* analyser = nullptr;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthAudioProcessor)
 };

@@ -14,7 +14,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # This is the internal name of the project and the name of JUCE's shared code target
 # Note: This cannot have spaces (it may be 2024, but you can't have it all!)
 # Worry not, JUCE's PRODUCT_NAME can have spaces (and is what DAWs display)
-set(PROJECT_NAME "SYNTH_TEMPLATE")
+set(PROJECT_NAME "FM")
 
 # From Eyal Amir: https://forum.juce.com/t/cmake-and-intellisense-for-windows-vscode/62183
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
@@ -43,10 +43,8 @@ juce_add_plugin(${PROJECT_NAME}
     PLUGIN_CODE Aran                            # A unique four-character plugin id with exactly one upper-case character
                                                 # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
     FORMATS AU VST3 Standalone                  # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
-    PRODUCT_NAME "SYNTH_TEMPLATE"                         # The name of the final executable, which can differ from the target name
+    PRODUCT_NAME "FM"                         # The name of the final executable, which can differ from the target name
 )
-
-add_subdirectory(Libs/foleys_gui_magic/modules)
 
 juce_generate_juce_header(${PROJECT_NAME})
 
@@ -57,7 +55,6 @@ target_sources("${PROJECT_NAME}" PRIVATE ${SourceFiles})
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
         # AudioPluginData           # If we'd created a binary data target, we'd link to it here
-        foleys_gui_magic
         juce::juce_audio_basics
         juce::juce_audio_plugin_client
         juce::juce_audio_processors

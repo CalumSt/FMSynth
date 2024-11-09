@@ -13,9 +13,9 @@
 //==============================================================================
 SynthAudioProcessor::SynthAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-    : foleys::MagicProcessor (juce::AudioProcessor::BusesProperties()
-    #if !JucePlugin_IsMidiEffect
-        #if ! JucePlugin_IsSynth
+     : AudioProcessor (BusesProperties()
+                     #if ! JucePlugin_IsMidiEffect
+                      #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
@@ -97,11 +97,6 @@ void SynthAudioProcessor::changeProgramName (int index, const juce::String& newN
 void SynthAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     parametersChanged.store(true);
-
-    // MAGIC GUI: setup the output meter
-    outputMeter->setupSource (getTotalNumOutputChannels(), sampleRate, 500);
-    oscilloscope->prepareToPlay (sampleRate, samplesPerBlock);
-    analyser->prepareToPlay (sampleRate, samplesPerBlock);
 }
 
 void SynthAudioProcessor::releaseResources()
@@ -153,6 +148,17 @@ void SynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
 
     // Process MIDI events - render is held in this too
     splitBufferByEvents(buffer, midiMessageList);
+}
+//==============================================================================
+
+bool SynthAudioProcessor::hasEditor() const
+{
+    return true; // (change this to false if you choose to not supply an editor)
+}
+
+juce::AudioProcessorEditor* SynthAudioProcessor::createEditor()
+{
+    return new SynthAudioProcessorEditor (*this);
 }
 
 //==============================================================================
