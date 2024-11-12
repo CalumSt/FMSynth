@@ -6,3 +6,9 @@
 [submodule "Libs/JUCE"]
 	path = Libs/JUCE
 	url = https://github.com/juce-framework/JUCE/
+    branch = develop
+
+[submodule "Libs/googletest"]
+    path = Libs/googletest
+    url = https://github.com/google/googletest.git
+    branch = develop
