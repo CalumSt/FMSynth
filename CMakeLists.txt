@@ -24,7 +24,8 @@ set(COMPANY_NAME "QUILTS")
 
 project(${PROJECT_NAME} VERSION 0.1)
 
-add_subdirectory(Libs/JUCE
+add_subdirectory(Libs/JUCE)
+add_subdirectory(Libs/CASPI)
 
 juce_add_plugin(${PROJECT_NAME}
     # VERSION ...                               # Set this if the plugin version is different to the project version
@@ -74,7 +75,7 @@ target_compile_definitions(${PROJECT_NAME}
 ## Testing
 
 add_subdirectory(Tests)
-add_subdirectory(Libs/googletest)
+add_subdirectory(${CASPI_SOURCE_DIR}/Libs/googletest)
 enable_testing()
 
 

@@ -25,7 +25,7 @@
 
 
 #pragma once
-#include "caspi_BlepOscillator.h"
+#include "caspi/.h"
 #include "caspi_EnvelopeGenerator.h"
 #include <cmath>
 #include <algorithm>
