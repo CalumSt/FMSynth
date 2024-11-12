@@ -3,15 +3,10 @@
 	url = https://github.com/google/googletest/
 	branch = develop
 
-[submodule "Libs/melatonin_inspector"]
-	path = Libs/melatonin_inspector
-	url = https://github.com/sudara/melatonin_inspector.git
-	branch = main
-
 [submodule "Libs/CASPI"]
 	path = Libs/CASPI
 	url = https://github.com/CalumSt/CASPI.git
-    branch = main
+    branch = develop
 
 [submodule "Libs/JUCE"]
 	path = Libs/JUCE

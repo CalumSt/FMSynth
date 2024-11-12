@@ -24,9 +24,7 @@ set(COMPANY_NAME "QUILTS")
 
 project(${PROJECT_NAME} VERSION 0.1)
 
-add_subdirectory(Libs/JUCE)
-
-# add_subdirectory(Libs/melatonin_inspector)
+add_subdirectory(Libs/JUCE
 
 juce_add_plugin(${PROJECT_NAME}
     # VERSION ...                               # Set this if the plugin version is different to the project version

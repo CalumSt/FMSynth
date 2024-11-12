@@ -17,7 +17,7 @@ template<typename T>
 inline void castParameter(juce::AudioProcessorValueTreeState& apvts,
                           const juce::ParameterID& id, T& destination)
 {
-    destination = dynamic_cast<T>(apvts.getParameter(id.getParamID()));
+    destination = dynamic_cast<T>(apvts.getParameter(id.getParamID())); /// I don't understand the dynamic cast here
     jassert(destination);  // parameter does not exist or wrong type
 }
 
@@ -34,33 +34,25 @@ struct fm_Parameters
     static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 
     void prepareToPlay(float sampleRate) noexcept;
-    void reset() noexcept;
-    void update() noexcept;
+    void reset() noexcept;  /// TODO: Implement me!
+    void update() noexcept; /// TODO: Implement me!
 
     // *** Plug-in parameters ***
 
-    juce::AudioParameterFloat* widthParam;
     juce::AudioParameterFloat* driveParam;
-    juce::AudioParameterChoice* octaveParam;
-    juce::AudioParameterFloat* tuningParam;
-    juce::AudioParameterFloat* glideTimeParam;
 
     // *** Parameter values ***
 
-    float sampleRate;
-    float pulseTime;  // seconds
-    int transpose;    // semitones
-    float tuning;     // cents
-    float glideTime;  // in samples
-    float drive;      // 0 - 1
+    float sampleRate = 44100.0f;
+    float drive      = 0.0f;      // 0 - 1
 
     // *** MIDI CC ***
 
-    float pitchBend;
+    float pitchBend = 0.0f;
 
     // *** Derived values ***
 
-    float pitchModulation;
+    float pitchModulation = 0.0f;
 
 };
 

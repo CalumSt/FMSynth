@@ -17,7 +17,8 @@ void fm_SynthEngine::noteOff(int note)
 
 void fm_SynthEngine::render(juce::AudioBuffer<float>& buffer, int startSample, int endSample)
 {
-
+    float* outputBufferLeft = outputBuffers[0];
+    float* outputBufferRight = outputBuffers[1];
 }
 
 void fm_SynthEngine::update()
@@ -44,6 +45,7 @@ void fm_SynthEngine::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBu
         handleMidiMessage(message);
     }
     // render the last bit ?
+    /// TODO: Work out what's going on here
     // render(buffer,currentSample,messagePosition);
 }//
 
