@@ -1,19 +1,19 @@
 /*****************************************************************************
-*   ,ad8888ba,    88        88  88  88      888888888888  ad88888ba   
-*  d8"'    `"8b   88        88  88  88           88      d8"     "8b  
-* d8'        `8b  88        88  88  88           88      Y8,          
-* 88          88  88        88  88  88           88      `Y8aaaaa,    
-* 88          88  88        88  88  88           88        `"""""8b,  
-* Y8,    "88,,8P  88        88  88  88           88              `8b  
-*  Y8a.    Y88P   Y8a.    .a8P  88  88           88      Y8a     a8P  
-*   `"Y8888Y"Y8a   `"Y8888Y"'   88  88888888888  88       "Y88888P"   
-*
-*    _____   __ __   __  
-*   |_  \ \ / //  | /  | 
-*     | |\ V / `| | `| | 
-*     | |/   \  | |  | | 
-* /\__/ / /^\ \_| |__| |_
-* \____/\/   \/\___/\___/
+ *   ,ad8888ba,    88        88  88  88      888888888888  ad88888ba
+ *  d8"'    `"8b   88        88  88  88           88      d8"     "8b
+ * d8'        `8b  88        88  88  88           88      Y8,
+ * 88          88  88        88  88  88           88      `Y8aaaaa,
+ * 88          88  88        88  88  88           88        `"""""8b,
+ * Y8,    "88,,8P  88        88  88  88           88              `8b
+ *  Y8a.    Y88P   Y8a.    .a8P  88  88           88      Y8a     a8P
+ *   `"Y8888Y"Y8a   `"Y8888Y"'   88  88888888888  88       "Y88888P"
+ *
+ * ███╗   ███╗ ██████╗ ██████╗ ██╗   ██╗██╗      █████╗ ████████╗ ██████╗ ██████╗
+ * ████╗ ████║██╔═══██╗██╔══██╗██║   ██║██║     ██╔══██╗╚══██╔══╝██╔═══██╗██╔══██╗
+ * ██╔████╔██║██║   ██║██║  ██║██║   ██║██║     ███████║   ██║   ██║   ██║██████╔╝
+ * ██║╚██╔╝██║██║   ██║██║  ██║██║   ██║██║     ██╔══██║   ██║   ██║   ██║██╔══██╗
+ * ██║ ╚═╝ ██║╚██████╔╝██████╔╝╚██████╔╝███████╗██║  ██║   ██║   ╚██████╔╝██║  ██║
+ * ╚═╝     ╚═╝ ╚═════╝ ╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝
 *
 * fm_SynthVoice.h
 * 
@@ -25,37 +25,134 @@
 
 
 #pragma once
-#include "caspi/.h"
-#include "caspi_EnvelopeGenerator.h"
+#include "Oscillators/caspi_PMOperator.h"
+#include "Envelopes/caspi_EnvelopeGenerator.h"
+#include "Utilities/caspi_Gain.h"
 #include <cmath>
 #include <algorithm>
 template <typename FloatType>
-class Voice
+struct Gain
+{
+    const FloatType zero = static_cast<FloatType>(0.0);
+    const FloatType one  = static_cast<FloatType>(1.0);
+    FloatType gain = zero;
+    FloatType gainIncrement = zero;
+    bool derampGain = false;
+    bool rampGain   = false;
+
+    void incrementGain()
+    {
+        if (derampGain) { gain = (gain < zero) ? zero : gain - gainIncrement; }
+        else if (rampGain) { gain = (gain < one) ? gain + gainIncrement : one; }
+    }
+
+    void gainRampDown(FloatType time, FloatType sampleRate)
+    {
+        derampGain = true;
+        gainIncrement = gain / (time * sampleRate);
+    }
+
+    void gainRampUp(FloatType time, FloatType sampleRate)
+    {
+        rampGain = true;
+        gainIncrement = gain / (time * sampleRate);
+    }
+
+    void reset()
+    {
+        derampGain = false;
+        rampGain = false;
+        gain = static_cast<FloatType>(0.0);
+        gainIncrement = gain;
+    }
+
+    FloatType getGain() { incrementGain(); return gain; }
+    void setGain(FloatType _gain) { gain = _gain; };
+};
+
+
+template <typename FloatType>
+class fm_SynthVoice
 {
     public:
-        int note;
-        int velocity;
-        caspi_BlepOscillator<FloatType>::Sine SineCarrier;
-        caspi_BlepOscillator<FloatType>::Saw SawCarrier;
-        caspi_BlepOscillator<FloatType>::Square SquareCarrier;
-        caspi_BlepOscillator<FloatType>::Triangle TriangleCarrier;
-        caspi_ADSREnvelope env;
-        jx11_Filter filter;
-        ADSREnvelope filterEnv;
-        FloatType period;
-        FloatType cutoff;
-        FloatType resonance;
-        FloatType filterMod;
-        FloatType filterEnvDepth;
-
-        // panning
-        FloatType panLeft;
-        FloatType panRight;
+        Gain<FloatType> Gain;
 
         // methods
-        void noteOff();
-        void reset();
-        void update();
-        FloatType render(FloatType input);
-        void setSampleRate(FloatType sampleRate);
+        void noteOn(const int _note, const int _velocity)
+        {
+            auto frequency = convertMidiToHz (note);
+            auto modIndex = static_cast<FloatType>(0.5); /// CHANGE ME
+            oscillator.setFrequency (frequency, modIndex ,sampleRate);
+            note = _note;
+            velocity = _velocity;
+            Gain.setGain (static_cast<FloatType>(0.75));
+            envelope.noteOn();
+
+        }
+
+        void noteOff()
+        {
+            envelope.noteOff();
+        }
+
+        void shutdown()
+        {
+            Gain.derampGain(static_cast<FloatType>(0.01), sampleRate);
+            if (Gain.getGain() <= oscillator.zero)
+            {
+                reset();
+            }
+        }
+
+        void reset()
+        {
+            Gain.reset();
+            noteOff();
+            oscillator.reset();
+            envelope.reset();
+        }
+        FloatType render() {
+            FloatType nextSample = oscillator.getNextSample();
+            FloatType envSample = envelope.render();
+            auto gain = Gain.getGain();
+            return gain * envSample * nextSample;
+        }
+        void setSampleRate (FloatType _sampleRate)
+        {
+            CASPI_ASSERT (sampleRate > 0, "Sample Rate must be greater than zero.");
+            sampleRate = _sampleRate;
+            envelope.setSampleRate (_sampleRate);
+        }
+
+        void setADSR(FloatType _attackTime, FloatType _decayTime, FloatType _sustainLevel, FloatType _releaseTime)
+        {
+            setAttackTime (_attackTime);
+            setSustainLevel (_sustainLevel);
+            setDecayTime (_decayTime);
+            setReleaseTime (_releaseTime);
+        }
+
+        void setAttackTime(FloatType _attackTime) { envelope.setAttackTime (_attackTime); }
+        void setDecayTime(FloatType _decayTime) { envelope.setDecayTime (_decayTime); }
+        void setSustainLevel(FloatType _sustainLevel) { envelope.setSustainLevel (_sustainLevel); }
+        void setReleaseTime(FloatType _releaseLevel) { envelope.setReleaseTime (_releaseLevel); }
+
+        [[nodiscard]] int getNote() const { return note; }
+        [[nodiscard]] int getVelocity() const { return velocity; }
+        [[nodiscard]] FloatType getSampleRate() const { return sampleRate; }
+
+        static FloatType convertMidiToHz(const int _note)
+        {
+            constexpr auto A4_FREQUENCY = 440.0;
+            constexpr auto A4_NOTE_NUMBER = 69.0;
+            constexpr auto NOTES_IN_AN_OCTAVE = 12.0;
+            return static_cast<FloatType>(A4_FREQUENCY * std::pow(2, (static_cast<double>(_note) - A4_NOTE_NUMBER) / NOTES_IN_AN_OCTAVE));
+        }
+
+private:
+        int note = 0;
+        int velocity = 0;
+        FloatType sampleRate = static_cast<FloatType>(44100.0);
+        CASPI::PMOperator<FloatType> oscillator;
+        CASPI::Envelope::ADSR<FloatType> envelope;
 };

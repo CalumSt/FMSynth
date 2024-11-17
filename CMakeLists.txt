@@ -27,6 +27,7 @@ project(${PROJECT_NAME} VERSION 0.1)
 add_subdirectory(Libs/JUCE)
 add_subdirectory(Libs/CASPI)
 
+
 juce_add_plugin(${PROJECT_NAME}
     # VERSION ...                               # Set this if the plugin version is different to the project version
     # ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
@@ -54,6 +55,7 @@ target_sources("${PROJECT_NAME}" PRIVATE ${SourceFiles})
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
         # AudioPluginData           # If we'd created a binary data target, we'd link to it here
+        CASPI
         juce::juce_audio_basics
         juce::juce_audio_plugin_client
         juce::juce_audio_processors
@@ -68,12 +70,10 @@ target_compile_definitions(${PROJECT_NAME}
         JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
         JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
         JUCE_VST3_CAN_REPLACE_VST2=0
-        FOLEYS_ENABLE_BINARY_DATA=0
-        FOLEYS_SHOW_GUI_EDITOR_PALLETTE=1
-        FOLEYS_SAVE_EDITED_GUI_IN_PLUGIN_STATE=0)
+)
+target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Libs/CASPI)
 
 ## Testing
-
 add_subdirectory(Tests)
 add_subdirectory(${CASPI_SOURCE_DIR}/Libs/googletest)
 enable_testing()
