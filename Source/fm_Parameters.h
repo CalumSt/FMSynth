@@ -23,7 +23,7 @@ inline void castParameter(juce::AudioProcessorValueTreeState& apvts,
 
 struct fm_Parameters
 {
-    fm_Parameters(juce::AudioProcessorValueTreeState& apvts)
+    explicit fm_Parameters (juce::AudioProcessorValueTreeState& apvts)
     {
         // Cast parameters
         castParameter(apvts, juce::ParameterID("drive"), driveParam);

@@ -1,8 +1,3 @@
-[submodule "Libs/CASPI"]
-	path = Libs/CASPI
-	url = https://github.com/CalumSt/CASPI.git
-    branch = develop
-
 [submodule "Libs/JUCE"]
 	path = Libs/JUCE
 	url = https://github.com/juce-framework/JUCE/
@@ -11,4 +6,9 @@
 [submodule "Libs/googletest"]
     path = Libs/googletest
     url = https://github.com/google/googletest.git
-    branch = develop
+    branch = main
+
+[submodule "CASPI"]
+	path = Libs/CASPI
+	url = https://github.com/CalumSt/CASPI.git
+	branch = develop

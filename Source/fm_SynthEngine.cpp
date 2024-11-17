@@ -12,13 +12,28 @@ void fm_SynthEngine::noteOn(int note, int velocity)
 
 void fm_SynthEngine::noteOff(int note)
 {
-
+    voices[note].noteOff();
 }
 
 void fm_SynthEngine::render(juce::AudioBuffer<float>& buffer, int startSample, int endSample)
 {
-    float* outputBufferLeft = outputBuffers[0];
-    float* outputBufferRight = outputBuffers[1];
+    auto* firstChannel = buffer.getWritePointer(0);
+    for (auto& voice : voices)
+    {
+        if (voice.isPlaying())
+        {
+            for (auto sample = startSample; sample < endSample; ++sample)
+            {
+                firstChannel[sample] += voice.getSample();
+            }
+        }
+    }
+
+    for (int channel = 1; channel < buffer.getNumChannels(); ++channel)
+    {
+        auto* channelData = buffer.getWritePointer(channel);
+        std::copy(firstChannel + startSample, firstChannel + endSample, channelData + startSample);
+    }
 }
 
 void fm_SynthEngine::update()

@@ -2,5 +2,8 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Libs/CASPI" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Libs/JUCE" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/Libs/googletest" vcs="Git" />
   </component>
 </project>

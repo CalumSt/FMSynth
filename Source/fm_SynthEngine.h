@@ -32,9 +32,11 @@
 #define SYNTHENGINE_H
 #include <JuceHeader.h>
 #include "fm_Parameters.h"
+#include "fm_SynthVoice.h"
 
 class fm_SynthEngine {
 public:
+    void initialiseVoices(int numberOfVoices);
     void reset();
     void noteOn(int note, int velocity);
     void render(juce::AudioBuffer<float>& buffer, int startSample, int endSample);
@@ -47,7 +49,8 @@ public:
     void handleMidiMessage (const juce::MidiMessage& message);
     static float midiNoteNumberToFrequency(int midiNoteNumber);
 private:
-    fm_Parameters& parameters;
+    fm_Parameters& parameters = fm_Parameters<float>;
+    auto voices = std::vector<>;
 };
 
 
