@@ -72,11 +72,11 @@ class fm_SynthVoice
             Gain.reset();
             noteOff();
             oscillator.reset();
+            testOsc.reset();
             envelope.reset();
         }
         FloatType render() {
-            // FloatType nextSample = oscillator.getNextSample();
-            FloatType nextSample = testOsc.getNextSample();
+            FloatType nextSample = oscillator.render();
             FloatType envSample = envelope.render();
             // auto gain = Gain.getGain();
             return envSample * nextSample;
