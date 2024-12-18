@@ -41,8 +41,9 @@ class fm_SynthVoice
         void noteOn(const int _note, const int _velocity)
         {
             auto frequency = convertMidiToHz (note);
-            auto modIndex = static_cast<FloatType>(0.00); /// CHANGE ME
-            oscillator.setFrequency (frequency, modIndex ,sampleRate);
+            auto modIndex = static_cast<FloatType>(0.50); /// CHANGE ME
+            oscillator.setFrequency (frequency ,sampleRate);
+            oscillator.setModulation (modIndex, static_cast<FloatType>(0.25));
             testOsc.setFrequency(frequency, sampleRate);
             note = _note;
             velocity = _velocity;
@@ -72,7 +73,7 @@ class fm_SynthVoice
             Gain.reset();
             noteOff();
             oscillator.reset();
-            testOsc.reset();
+            testOsc.resetPhase();
             envelope.reset();
         }
         FloatType render() {
