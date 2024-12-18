@@ -17,13 +17,13 @@ template<typename T>
 inline void castParameter(juce::AudioProcessorValueTreeState& apvts,
                           const juce::ParameterID& id, T& destination)
 {
-    destination = dynamic_cast<T>(apvts.getParameter(id.getParamID()));
+    destination = dynamic_cast<T>(apvts.getParameter(id.getParamID())); /// I don't understand the dynamic cast here
     jassert(destination);  // parameter does not exist or wrong type
 }
 
 struct fm_Parameters
 {
-    fm_Parameters(juce::AudioProcessorValueTreeState& apvts)
+    explicit fm_Parameters (juce::AudioProcessorValueTreeState& apvts)
     {
         // Cast parameters
         castParameter(apvts, juce::ParameterID("drive"), driveParam);
@@ -31,36 +31,42 @@ struct fm_Parameters
     }
 
 
-    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+    {
+        juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+        // Examples left in
+
+        layout.add(std::make_unique<juce::AudioParameterChoice>("polyMode", "Polyphony",
+                   juce::StringArray{"Mono","Poly"},1));
+
+        layout.add(std::make_unique<juce::AudioParameterFloat>("outputLevel", "Output Level",
+                   juce::NormalisableRange<float>(-24.0f,6.0f,0.1f),0.0f,
+                   juce::AudioParameterFloatAttributes().withLabel("dB")));
+
+        return layout;
+    }
 
     void prepareToPlay(float sampleRate) noexcept;
-    void reset() noexcept;
-    void update() noexcept;
+    void reset() noexcept;  /// TODO: Implement me!
+    void update() noexcept; /// TODO: Implement me!
 
     // *** Plug-in parameters ***
 
-    juce::AudioParameterFloat* widthParam;
-    juce::AudioParameterFloat* driveParam;
-    juce::AudioParameterChoice* octaveParam;
-    juce::AudioParameterFloat* tuningParam;
-    juce::AudioParameterFloat* glideTimeParam;
+    juce::AudioParameterFloat* driveParam{};
 
     // *** Parameter values ***
 
-    float sampleRate;
-    float pulseTime;  // seconds
-    int transpose;    // semitones
-    float tuning;     // cents
-    float glideTime;  // in samples
-    float drive;      // 0 - 1
+    float sampleRate = 44100.0f;
+    float drive      = 0.0f;      // 0 - 1
 
     // *** MIDI CC ***
 
-    float pitchBend;
+    float pitchBend = 0.0f;
 
     // *** Derived values ***
 
-    float pitchModulation;
+    float pitchModulation = 0.0f;
 
 };
 

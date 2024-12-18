@@ -1,18 +1,14 @@
-[submodule "Libs/googletest"]
-	path = Libs/googletest
-	url = https://github.com/google/googletest/
-	branch = develop
-
-[submodule "Libs/melatonin_inspector"]
-	path = Libs/melatonin_inspector
-	url = https://github.com/sudara/melatonin_inspector.git
-	branch = main
-
-[submodule "Libs/CASPI"]
-	path = Libs/CASPI
-	url = https://github.com/CalumSt/CASPI.git
-    branch = main
-
 [submodule "Libs/JUCE"]
 	path = Libs/JUCE
 	url = https://github.com/juce-framework/JUCE/
+    branch = develop
+
+[submodule "Libs/googletest"]
+    path = Libs/googletest
+    url = https://github.com/google/googletest.git
+    branch = main
+
+[submodule "CASPI"]
+	path = Libs/CASPI
+	url = https://github.com/CalumSt/CASPI.git
+	branch = develop

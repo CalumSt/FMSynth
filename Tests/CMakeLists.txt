@@ -12,6 +12,8 @@ set(This Tests)
 # ADD TEST FILES HERE
 set(SOURCES
         Test.cpp
+        Voice_test.cpp
+        Voice_test.cpp
 )
 # --------------------------------------------------------------------------
 
@@ -25,6 +27,7 @@ target_include_directories(${PROJECT_NAME}
         ${CMAKE_CURRENT_SOURCE_DIR}/../Libs/googletest/googletest/include
         ${CMAKE_CURRENT_SOURCE_DIR}/../Source
         ${CMAKE_CURRENT_SOURCE_DIR}/../Libs/JUCE/modules
+        ${CMAKE_CURRENT_SOURCE_DIR}/../Libs/CASPI/Source
     )    
 # --------------------------------------------------------------------------
     
@@ -35,7 +38,7 @@ PUBLIC
     juce::juce_recommended_config_flags
     juce::juce_recommended_lto_flags
     juce::juce_recommended_warning_flags    
-    Template
+    CASPI
     GTest::gtest_main)
 
 

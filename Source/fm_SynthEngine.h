@@ -32,22 +32,26 @@
 #define SYNTHENGINE_H
 #include <JuceHeader.h>
 #include "fm_Parameters.h"
+#include "fm_SynthVoice.h"
 
 class fm_SynthEngine {
 public:
+    void initialiseVoices(int numberOfVoices);
     void reset();
     void noteOn(int note, int velocity);
     void render(juce::AudioBuffer<float>& buffer, int startSample, int endSample);
     void noteOff(int note);
     void allNotesOff();
     void update();
+    void setSampleRate (const float _sampleRate) { sampleRate = _sampleRate; }
 
     /// MIDI - uses JUCE so is isolated here
     void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessageList);
     void handleMidiMessage (const juce::MidiMessage& message);
     static float midiNoteNumberToFrequency(int midiNoteNumber);
 private:
-    fm_Parameters& parameters;
+    fm_SynthVoice<float> voice = fm_SynthVoice<float>();
+    float sampleRate = 44100.0f;
 };
 
 

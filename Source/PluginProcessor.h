@@ -7,13 +7,13 @@
 */
 
 #pragma once
+#include "fm_SynthEngine.h"
 #include <JuceHeader.h>
 //==============================================================================
-class SynthAudioProcessor : public juce::AudioProcessor, public juce::ValueTree::Listener
+class SynthAudioProcessor : public juce::AudioProcessor
 {
 public:
-    //==============================================================================
-    juce::AudioProcessorValueTreeState parameterTree { *this, nullptr, "Parameters", createParameterLayout() };
+    //=============================================================================
 
     //==============================================================================
     SynthAudioProcessor();
@@ -54,28 +54,11 @@ public:
 
 private:
     //==============================================================================
-    // Synth Parameters
-    //juce::AudioParameterFloat* outputLevel;
-    //juce::AudioParameterChoice* polyMode;
-    //==============================================================================
-    juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
-    //==============================================================================
-
-    void splitBufferByEvents(juce::AudioBuffer<float>&buffer, juce::MidiBuffer& midiMessages);
-    void handleMidi(uint8_t data0, uint8_t data1, uint8_t data2);
-    void render(juce::AudioBuffer<float>& buffer, int sampleCount, int bufferOffset);
-
-
-    //==============================================================================
-    std::atomic<bool> parametersChanged { false }; // Use an atomic bool to check for any parameter changes
-
-    void valueTreePropertyChanged(juce::ValueTree&, const juce::Identifier&) override
-    {
-      parametersChanged.store(true);
-    }
 
     void update();
 
     //==============================================================================
+    fm_SynthEngine SynthEngine;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthAudioProcessor)
 };
