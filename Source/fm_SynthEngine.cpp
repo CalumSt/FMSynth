@@ -2,30 +2,27 @@
 
 void fm_SynthEngine::reset()
 {
-    /// DO SOME STUFF
+    voice.reset();
 }
 
-void fm_SynthEngine::noteOn(int note, int velocity)
+void fm_SynthEngine::noteOn (const int note, const int velocity)
 {
-
+    voice.noteOn (note,velocity);
 }
 
-void fm_SynthEngine::noteOff(int note)
+void fm_SynthEngine::noteOff(int note [[maybe_unused]] )
 {
-    voices[note].noteOff();
+    voice.noteOff();
 }
 
 void fm_SynthEngine::render(juce::AudioBuffer<float>& buffer, int startSample, int endSample)
 {
     auto* firstChannel = buffer.getWritePointer(0);
-    for (auto& voice : voices)
+    if (voice.isActive())
     {
-        if (voice.isPlaying())
+        for (auto sample = startSample; sample < endSample; ++sample)
         {
-            for (auto sample = startSample; sample < endSample; ++sample)
-            {
-                firstChannel[sample] += voice.getSample();
-            }
+            firstChannel[sample] += voice.render();
         }
     }
 
@@ -38,12 +35,12 @@ void fm_SynthEngine::render(juce::AudioBuffer<float>& buffer, int startSample, i
 
 void fm_SynthEngine::update()
 {
-
+    // Currently empty, but will give new parameters in future
 }
 
 void fm_SynthEngine::allNotesOff()
 {
-
+    voice.noteOff();
 }
 
 void fm_SynthEngine::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessageList)
@@ -61,7 +58,7 @@ void fm_SynthEngine::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBu
     }
     // render the last bit ?
     /// TODO: Work out what's going on here
-    // render(buffer,currentSample,messagePosition);
+    //render(buffer,currentSample,messagePosition);
 }//
 
 
@@ -96,6 +93,13 @@ void fm_SynthEngine::handleMidiMessage (const juce::MidiMessage& message)
         // Stub
     }
 }
+
+void fm_SynthEngine::initialiseVoices (int numberOfVoices [[maybe_unused]])
+{
+    voice.setADSR (0.1f,0.1f,0.8f,0.2f);
+    voice.setSampleRate (sampleRate);
+}
+
 
 float fm_SynthEngine::midiNoteNumberToFrequency(const int midiNoteNumber)
 {

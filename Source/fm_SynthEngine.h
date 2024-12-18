@@ -43,14 +43,15 @@ public:
     void noteOff(int note);
     void allNotesOff();
     void update();
+    void setSampleRate (const float _sampleRate) { sampleRate = _sampleRate; }
 
     /// MIDI - uses JUCE so is isolated here
     void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessageList);
     void handleMidiMessage (const juce::MidiMessage& message);
     static float midiNoteNumberToFrequency(int midiNoteNumber);
 private:
-    fm_Parameters& parameters = fm_Parameters<float>;
-    auto voices = std::vector<>;
+    fm_SynthVoice<float> voice = fm_SynthVoice<float>();
+    float sampleRate = 44100.0f;
 };
 
 

@@ -29,70 +29,33 @@
 #include "Envelopes/caspi_EnvelopeGenerator.h"
 #include "Utilities/caspi_Gain.h"
 #include <cmath>
-#include <algorithm>
-template <typename FloatType>
-struct Gain
-{
-    const FloatType zero = static_cast<FloatType>(0.0);
-    const FloatType one  = static_cast<FloatType>(1.0);
-    FloatType gain = zero;
-    FloatType gainIncrement = zero;
-    bool derampGain = false;
-    bool rampGain   = false;
-
-    void incrementGain()
-    {
-        if (derampGain) { gain = (gain < zero) ? zero : gain - gainIncrement; }
-        else if (rampGain) { gain = (gain < one) ? gain + gainIncrement : one; }
-    }
-
-    void gainRampDown(FloatType time, FloatType sampleRate)
-    {
-        derampGain = true;
-        gainIncrement = gain / (time * sampleRate);
-    }
-
-    void gainRampUp(FloatType time, FloatType sampleRate)
-    {
-        rampGain = true;
-        gainIncrement = gain / (time * sampleRate);
-    }
-
-    void reset()
-    {
-        derampGain = false;
-        rampGain = false;
-        gain = static_cast<FloatType>(0.0);
-        gainIncrement = gain;
-    }
-
-    FloatType getGain() { incrementGain(); return gain; }
-    void setGain(FloatType _gain) { gain = _gain; };
-};
-
+#include "Oscillators/caspi_BlepOscillator.h"
 
 template <typename FloatType>
 class fm_SynthVoice
 {
     public:
-        Gain<FloatType> Gain;
+        CASPI::Gain<FloatType> Gain;
 
         // methods
         void noteOn(const int _note, const int _velocity)
         {
             auto frequency = convertMidiToHz (note);
-            auto modIndex = static_cast<FloatType>(0.5); /// CHANGE ME
+            auto modIndex = static_cast<FloatType>(0.00); /// CHANGE ME
             oscillator.setFrequency (frequency, modIndex ,sampleRate);
+            testOsc.setFrequency(frequency, sampleRate);
             note = _note;
             velocity = _velocity;
             Gain.setGain (static_cast<FloatType>(0.75));
             envelope.noteOn();
+            active = true;
 
         }
 
         void noteOff()
         {
             envelope.noteOff();
+            active = false;
         }
 
         void shutdown()
@@ -112,10 +75,11 @@ class fm_SynthVoice
             envelope.reset();
         }
         FloatType render() {
-            FloatType nextSample = oscillator.getNextSample();
+            // FloatType nextSample = oscillator.getNextSample();
+            FloatType nextSample = testOsc.getNextSample();
             FloatType envSample = envelope.render();
-            auto gain = Gain.getGain();
-            return gain * envSample * nextSample;
+            // auto gain = Gain.getGain();
+            return envSample * nextSample;
         }
         void setSampleRate (FloatType _sampleRate)
         {
@@ -140,6 +104,7 @@ class fm_SynthVoice
         [[nodiscard]] int getNote() const { return note; }
         [[nodiscard]] int getVelocity() const { return velocity; }
         [[nodiscard]] FloatType getSampleRate() const { return sampleRate; }
+        [[nodiscard]] bool isActive() const { return active; }
 
         static FloatType convertMidiToHz(const int _note)
         {
@@ -150,9 +115,11 @@ class fm_SynthVoice
         }
 
 private:
+        bool active = false;
         int note = 0;
         int velocity = 0;
         FloatType sampleRate = static_cast<FloatType>(44100.0);
         CASPI::PMOperator<FloatType> oscillator;
         CASPI::Envelope::ADSR<FloatType> envelope;
+        CASPI::BlepOscillator::Saw<FloatType> testOsc;
 };

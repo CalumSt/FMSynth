@@ -31,7 +31,21 @@ struct fm_Parameters
     }
 
 
-    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+    static juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+    {
+        juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+        // Examples left in
+
+        layout.add(std::make_unique<juce::AudioParameterChoice>("polyMode", "Polyphony",
+                   juce::StringArray{"Mono","Poly"},1));
+
+        layout.add(std::make_unique<juce::AudioParameterFloat>("outputLevel", "Output Level",
+                   juce::NormalisableRange<float>(-24.0f,6.0f,0.1f),0.0f,
+                   juce::AudioParameterFloatAttributes().withLabel("dB")));
+
+        return layout;
+    }
 
     void prepareToPlay(float sampleRate) noexcept;
     void reset() noexcept;  /// TODO: Implement me!
@@ -39,7 +53,7 @@ struct fm_Parameters
 
     // *** Plug-in parameters ***
 
-    juce::AudioParameterFloat* driveParam;
+    juce::AudioParameterFloat* driveParam{};
 
     // *** Parameter values ***
 
