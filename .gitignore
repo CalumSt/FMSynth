@@ -5,6 +5,7 @@ build
 .vscode
 .cache
 .idea
+.idea/
 Builds/cmake-build-debug
 cmake-build-debug
 cmake-build-release
