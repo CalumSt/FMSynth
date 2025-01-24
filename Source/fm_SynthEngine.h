@@ -6,10 +6,9 @@
  * ██║ ╚═╝ ██║╚██████╔╝██████╔╝╚██████╔╝███████╗██║  ██║   ██║   ╚██████╔╝██║  ██║
  * ╚═╝     ╚═╝ ╚═════╝ ╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝
  *
- * @file SynthEngine.h
+ * @file fm_SynthEngine.h
  * @brief Header file for the SynthEngine class.
- * @author [Your Name]
- * @date [Current Date]
+ * @author CS Islay
  *
  * @par Description
  * This header file defines the SynthEngine class, which is responsible for generating audio.
@@ -43,14 +42,17 @@ public:
     void noteOff(int note);
     void allNotesOff();
     void update();
-    void setSampleRate (const float _sampleRate) { sampleRate = _sampleRate; }
+    void setSampleRate (const float _sampleRate)
+    {
+        sampleRate = _sampleRate;
+        voice.setSampleRate (sampleRate);
+    }
 
     /// MIDI - uses JUCE so is isolated here
-    void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessageList);
+    void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer const& midiMessageList);
     void handleMidiMessage (const juce::MidiMessage& message);
-    static float midiNoteNumberToFrequency(int midiNoteNumber);
 private:
-    fm_SynthVoice<float> voice = fm_SynthVoice<float>();
+    fm_SynthVoice<float> voice;
     float sampleRate = 44100.0f;
 };
 
