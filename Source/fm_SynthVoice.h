@@ -25,44 +25,48 @@
 
 
 #pragma once
-#include "Oscillators/caspi_PMOperator.h"
-#include "Envelopes/caspi_EnvelopeGenerator.h"
+#include "Synthesizers/caspi_PMAlgorithm.h"
+#include "Utilities/caspi_Maths.h"
 #include "Utilities/caspi_Gain.h"
-#include <cmath>
 #include "Oscillators/caspi_BlepOscillator.h"
 
 template <typename FloatType>
 class fm_SynthVoice
 {
+    using enum CASPI::PM::Algorithms::BasicCascadeOpCodes;
     public:
         CASPI::Gain<FloatType> Gain;
+        CASPI::PM::Algorithms::BasicCascade<FloatType> Oscillator;
 
         // methods
         void noteOn(const int _note, const int _velocity)
         {
-            auto frequency = convertMidiToHz (note);
-            auto modIndex = static_cast<FloatType>(0.50); /// CHANGE ME
-            oscillator.setFrequency (frequency ,sampleRate);
-            oscillator.setModulation (modIndex, static_cast<FloatType>(0.25));
-            testOsc.setFrequency(frequency, sampleRate);
             note = _note;
             velocity = _velocity;
-            Gain.setGain (static_cast<FloatType>(0.75));
-            envelope.noteOn();
+            auto frequency = CASPI::Maths::midiNoteToHz<FloatType> (note);
+            auto modIndex = static_cast<FloatType> (0.50); /// CHANGE ME
+            Oscillator.setFrequency (frequency, sampleRate);
+            Oscillator.setModulation (modIndex, static_cast<FloatType> (0.25));
+            Oscillator.enableADSR(Carrier);
+            Oscillator.noteOn();
+            Gain.setGainRampDuration (static_cast<FloatType> (0.003),sampleRate); // Suppress audible pops
+            Gain.setGain (static_cast<FloatType> (0.75), sampleRate);
             active = true;
-
         }
 
         void noteOff()
         {
-            envelope.noteOff();
+            Oscillator.noteOff();
+            Gain.setGainRampDuration (static_cast<FloatType> (0.001),sampleRate); // Suppress audible pops
+            Gain.setGain (CASPI::Constants::zero<FloatType>, sampleRate, true);
             active = false;
         }
 
         void shutdown()
         {
-            Gain.derampGain(static_cast<FloatType>(0.01), sampleRate);
-            if (Gain.getGain() <= oscillator.zero)
+            Gain.setGain(static_cast<FloatType>(0), sampleRate);
+            Gain.setGainRampDuration (0.01,sampleRate);
+            if (Gain.getGain() <= Oscillator.zero)
             {
                 reset();
             }
@@ -72,21 +76,20 @@ class fm_SynthVoice
         {
             Gain.reset();
             noteOff();
-            oscillator.reset();
-            testOsc.resetPhase();
-            envelope.reset();
+            Oscillator.reset();
         }
-        FloatType render() {
-            FloatType nextSample = oscillator.render();
-            FloatType envSample = envelope.render();
-            // auto gain = Gain.getGain();
-            return envSample * nextSample;
+        FloatType render()
+        {
+            FloatType nextSample = Oscillator.render();
+            Gain.apply(nextSample);
+            return nextSample;
         }
         void setSampleRate (FloatType _sampleRate)
         {
             CASPI_ASSERT (sampleRate > 0, "Sample Rate must be greater than zero.");
             sampleRate = _sampleRate;
-            envelope.setSampleRate (_sampleRate);
+            Oscillator.setSampleRate(_sampleRate);
+            Gain.setSampleRate (_sampleRate);
         }
 
         void setADSR(FloatType _attackTime, FloatType _decayTime, FloatType _sustainLevel, FloatType _releaseTime)
@@ -96,31 +99,20 @@ class fm_SynthVoice
             setDecayTime (_decayTime);
             setReleaseTime (_releaseTime);
         }
-
-        void setAttackTime(FloatType _attackTime) { envelope.setAttackTime (_attackTime); }
-        void setDecayTime(FloatType _decayTime) { envelope.setDecayTime (_decayTime); }
-        void setSustainLevel(FloatType _sustainLevel) { envelope.setSustainLevel (_sustainLevel); }
-        void setReleaseTime(FloatType _releaseLevel) { envelope.setReleaseTime (_releaseLevel); }
+        // just use Carrier ADSR for now
+        void setAttackTime(FloatType _attackTime) { Oscillator.setAttackTime (Carrier,_attackTime); }
+        void setDecayTime(FloatType _decayTime) { Oscillator.setDecayTime (Carrier,_decayTime); }
+        void setSustainLevel(FloatType _sustainLevel) { Oscillator.setSustainLevel (Carrier,_sustainLevel); }
+        void setReleaseTime(FloatType _releaseLevel) { Oscillator.setReleaseTime (Carrier,_releaseLevel); }
 
         [[nodiscard]] int getNote() const { return note; }
         [[nodiscard]] int getVelocity() const { return velocity; }
         [[nodiscard]] FloatType getSampleRate() const { return sampleRate; }
         [[nodiscard]] bool isActive() const { return active; }
 
-        static FloatType convertMidiToHz(const int _note)
-        {
-            constexpr auto A4_FREQUENCY = 440.0;
-            constexpr auto A4_NOTE_NUMBER = 69.0;
-            constexpr auto NOTES_IN_AN_OCTAVE = 12.0;
-            return static_cast<FloatType>(A4_FREQUENCY * std::pow(2, (static_cast<double>(_note) - A4_NOTE_NUMBER) / NOTES_IN_AN_OCTAVE));
-        }
-
 private:
         bool active = false;
         int note = 0;
         int velocity = 0;
-        FloatType sampleRate = static_cast<FloatType>(44100.0);
-        CASPI::PMOperator<FloatType> oscillator;
-        CASPI::Envelope::ADSR<FloatType> envelope;
-        CASPI::BlepOscillator::Saw<FloatType> testOsc;
+        FloatType sampleRate = CASPI::Constants::DEFAULT_SAMPLE_RATE<FloatType>;
 };

@@ -8,13 +8,19 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include <cstdint>
 
 //==============================================================================
 SynthAudioProcessor::SynthAudioProcessor()
-:     AudioProcessor(
-   BusesProperties().withOutput("Output", juce::AudioChannelSet::stereo(), true)
-)
+#ifndef JucePlugin_PreferredChannelConfigurations
+     : AudioProcessor (BusesProperties()
+                     #if ! JucePlugin_IsMidiEffect
+                      #if ! JucePlugin_IsSynth
+                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
+                      #endif
+                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
+                     #endif
+                       )
+#endif
 {
 }
 
@@ -87,16 +93,14 @@ void SynthAudioProcessor::changeProgramName (int index, const juce::String& newN
 //==============================================================================
 void SynthAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    SynthEngine.initialiseVoices (1);
+    SynthEngine.initialiseVoices(1);
+    SynthEngine.setSampleRate(static_cast<float>(sampleRate));
 }
 
 void SynthAudioProcessor::releaseResources()
 {
-}
-
-void SynthAudioProcessor::reset()
-{
-    SynthEngine.reset();
+    // When playback stops, you can use this as an opportunity to free up any
+    // spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -108,7 +112,7 @@ bool SynthAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) co
   #else
     // This is the place where you check if the layout is supported.
     // In this template code we only support mono or stereo.
-    // Some plugin hosts, such as certain GarageBand versions, will only{}
+    // Some plugin hosts, such as certain GarageBand versions, will only
     // load plugins that support stereo bus layouts.
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
      && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
@@ -141,8 +145,14 @@ void SynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     // Process MIDI events - render is held in this too
     SynthEngine.processBlock(buffer, midiMessageList);
 }
-//==============================================================================
 
+bool SynthAudioProcessor::update()
+{
+    SynthEngine.update();
+    return true;
+}
+
+//============= =================================================================
 bool SynthAudioProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
@@ -166,15 +176,11 @@ void SynthAudioProcessor::setStateInformation (const void* data, int sizeInBytes
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 }
-//==============================================================================
 
-void SynthAudioProcessor::update()
-{
-    SynthEngine.update();
-}
 //==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
     return new SynthAudioProcessor();
 }
+
