@@ -1,5 +1,5 @@
 /*
-  ==============================================================================
+==============================================================================
 
     This file contains the basic framework code for a JUCE plugin editor.
 
@@ -12,6 +12,8 @@
 #include "PluginProcessor.h"
 
 //==============================================================================
+/**
+*/
 class SynthAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
 public:
@@ -26,5 +28,6 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     SynthAudioProcessor& audioProcessor;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthAudioProcessorEditor)
 };

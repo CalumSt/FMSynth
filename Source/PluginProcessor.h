@@ -10,10 +10,9 @@
 
 #include <JuceHeader.h>
 #include "fm_SynthEngine.h"
+#include "fm_Parameters.h"
 
 //==============================================================================
-/**
-*/
 class SynthAudioProcessor  : public juce::AudioProcessor
 {
 public:
@@ -57,6 +56,9 @@ public:
 
 private:
     fm_SynthEngine SynthEngine;
+    AudioProcessorValueTreeState parameterTree;
+    fm_Parameters<float> params;
+    UndoManager undoManager;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthAudioProcessor)
 };

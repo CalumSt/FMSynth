@@ -12,14 +12,17 @@
 //==============================================================================
 SynthAudioProcessor::SynthAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
-                     #endif
-                       )
+    : AudioProcessor (BusesProperties()
+    #if !JucePlugin_IsMidiEffect
+        #if !JucePlugin_IsSynth
+                          .withInput ("Input", juce::AudioChannelSet::stereo(), true)
+        #endif
+                          .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
+    #endif
+              ),
+      parameterTree (*this, nullptr, "Parameters", fm_Parameters<float>::createParameterLayout()),
+      params(parameterTree),
+      SynthEngine(params)
 #endif
 {
 }
@@ -93,7 +96,7 @@ void SynthAudioProcessor::changeProgramName (int index, const juce::String& newN
 //==============================================================================
 void SynthAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    SynthEngine.initialiseVoices(1);
+    SynthEngine.initialiseVoices();
     SynthEngine.setSampleRate(static_cast<float>(sampleRate));
 }
 

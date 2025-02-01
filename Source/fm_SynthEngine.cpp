@@ -1,28 +1,41 @@
 #include "fm_SynthEngine.h"
 
+fm_SynthEngine::fm_SynthEngine(fm_Parameters<float>& parameters) : parameters (parameters) { }
+
 void fm_SynthEngine::reset()
 {
-    voice.reset();
+    for (auto& voice: voices)
+    {
+        voice.reset();
+    }
+
 }
 
 void fm_SynthEngine::noteOn (const int note, const int velocity)
 {
-    voice.noteOn (note, velocity);
+    // call the voice's noteOn function, using the note num number as the voice index
+    const auto voiceIndex = note - 1;
+    voices.at(voiceIndex).noteOn (note, velocity);
 }
 
-void fm_SynthEngine::noteOff (int note [[maybe_unused]])
+void fm_SynthEngine::noteOff (const int note)
 {
-    voice.noteOff();
+    const auto voiceIndex = note - 1;
+    voices.at(voiceIndex).noteOff ();
 }
 
-void fm_SynthEngine::render (juce::AudioBuffer<float>& buffer, int startSample, int endSample)
+void fm_SynthEngine::render (juce::AudioBuffer<float>& buffer, const int startSample, const int endSample)
 {
     auto* firstChannel = buffer.getWritePointer (0);
-    if (voice.isActive())
+
+    for (auto& voice : voices)
     {
-        for (auto sample = startSample; sample < endSample; ++sample)
+        if (voice.isActive())
         {
-            firstChannel[sample] += voice.render();
+            for (auto sample = startSample; sample < endSample; ++sample)
+            {
+                firstChannel[sample] += voice.render();
+            }
         }
     }
 
@@ -40,7 +53,11 @@ void fm_SynthEngine::update()
 
 void fm_SynthEngine::allNotesOff()
 {
-    voice.noteOff();
+    for (auto &voice : voices)
+    {
+        voice.noteOff();
+    }
+
 }
 
 void fm_SynthEngine::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer const& midiMessageList)
@@ -91,8 +108,12 @@ void fm_SynthEngine::handleMidiMessage (const juce::MidiMessage& message)
     }
 }
 
-void fm_SynthEngine::initialiseVoices (int numberOfVoices [[maybe_unused]])
+void fm_SynthEngine::initialiseVoices ()
 {
-    voice.setADSR (0.01f, 0.1f, 0.8f, 0.2f);
-    voice.setSampleRate (sampleRate);
+
+    for (auto& voice : voices)
+    {
+        voice.setADSR (0.01f, 0.1f, 0.8f, 0.2f);
+        voice.setSampleRate (sampleRate);
+    }
 }

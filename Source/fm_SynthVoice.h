@@ -57,8 +57,8 @@ class fm_SynthVoice
         void noteOff()
         {
             Oscillator.noteOff();
-            Gain.setGainRampDuration (static_cast<FloatType> (0.001),sampleRate); // Suppress audible pops
-            Gain.setGain (CASPI::Constants::zero<FloatType>, sampleRate, true);
+            Gain.setGainRampDuration (static_cast<FloatType> (0.002),sampleRate); // Suppress audible pops
+            Gain.setGain (CASPI::Constants::zero<FloatType>, sampleRate);
             active = false;
         }
 
@@ -91,6 +91,10 @@ class fm_SynthVoice
             Oscillator.setSampleRate(_sampleRate);
             Gain.setSampleRate (_sampleRate);
         }
+        /// Modulation setters
+        void setModulationFeedback(FloatType modDepth) { Oscillator.setModulationFeedback (modDepth);};
+        // this might need to be changed in future to account for different algorithms!
+        void setModulation(FloatType modIndex, FloatType modDepth) { Oscillator.setModulation(modIndex, modDepth);};
 
         void setADSR(FloatType _attackTime, FloatType _decayTime, FloatType _sustainLevel, FloatType _releaseTime)
         {

@@ -12,6 +12,11 @@ TEST(VoiceTests, Constructor_test) {
     EXPECT_EQ(44100.0f, voice.getSampleRate());
 }
 
+TEST(VoiceTests, SetModulation_test)
+{
+
+}
+
 TEST(VoiceTests, Render_test)
 {
     fm_SynthVoice<float> voice;

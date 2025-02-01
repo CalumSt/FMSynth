@@ -29,30 +29,36 @@
 
 #ifndef SYNTHENGINE_H
 #define SYNTHENGINE_H
+
 #include <JuceHeader.h>
 #include "fm_Parameters.h"
 #include "fm_SynthVoice.h"
 
 class fm_SynthEngine {
 public:
-    void initialiseVoices(int numberOfVoices);
+    explicit fm_SynthEngine(fm_Parameters<float>& parameters);
+    void initialiseVoices();
     void reset();
     void noteOn(int note, int velocity);
-    void render(juce::AudioBuffer<float>& buffer, int startSample, int endSample);
+    void render(AudioBuffer<float>& buffer, int startSample, int endSample);
     void noteOff(int note);
     void allNotesOff();
     void update();
-    void setSampleRate (const float _sampleRate)
+    void setSampleRate (const float newSampleRate)
     {
-        sampleRate = _sampleRate;
-        voice.setSampleRate (sampleRate);
+        sampleRate = newSampleRate;
+        for (auto & voice : voices) { voice.setSampleRate (newSampleRate); }
     }
 
     /// MIDI - uses JUCE so is isolated here
     void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer const& midiMessageList);
     void handleMidiMessage (const juce::MidiMessage& message);
+
 private:
-    fm_SynthVoice<float> voice;
+    // holds a pointer to an array of voices
+    std::vector<fm_SynthVoice<float>> voices {128};
+
+    fm_Parameters<float>& parameters;
     float sampleRate = 44100.0f;
 };
 
