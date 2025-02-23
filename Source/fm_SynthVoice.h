@@ -92,7 +92,7 @@ class fm_SynthVoice
             Gain.setSampleRate (_sampleRate);
         }
         /// Modulation setters
-        void setModulationFeedback(FloatType modDepth) { Oscillator.setModulationFeedback (modDepth);};
+        void setModulationFeedback(FloatType modFeedback) { Oscillator.setModulationFeedback (modFeedback);};
         // this might need to be changed in future to account for different algorithms!
         void setModulation(FloatType modIndex, FloatType modDepth) { Oscillator.setModulation(modIndex, modDepth);};
 

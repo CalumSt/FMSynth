@@ -36,7 +36,7 @@
 
 class fm_SynthEngine {
 public:
-    explicit fm_SynthEngine(fm_Parameters<float>& parameters);
+    explicit fm_SynthEngine(fm_Parameters& parameters);
     void initialiseVoices();
     void reset();
     void noteOn(int note, int velocity);
@@ -58,7 +58,7 @@ private:
     // holds a pointer to an array of voices
     std::vector<fm_SynthVoice<float>> voices {128};
 
-    fm_Parameters<float>& parameters;
+    fm_Parameters& parameters;
     float sampleRate = 44100.0f;
 };
 

@@ -1,6 +1,6 @@
 #include "fm_SynthEngine.h"
 
-fm_SynthEngine::fm_SynthEngine(fm_Parameters<float>& parameters) : parameters (parameters) { }
+fm_SynthEngine::fm_SynthEngine(fm_Parameters& parameters) : parameters (parameters) { }
 
 void fm_SynthEngine::reset()
 {
@@ -8,6 +8,8 @@ void fm_SynthEngine::reset()
     {
         voice.reset();
     }
+
+    parameters.reset();
 
 }
 
@@ -34,7 +36,7 @@ void fm_SynthEngine::render (juce::AudioBuffer<float>& buffer, const int startSa
         {
             for (auto sample = startSample; sample < endSample; ++sample)
             {
-                firstChannel[sample] += voice.render();
+                firstChannel[sample] += parameters.outputLevel * voice.render();
             }
         }
     }
@@ -48,7 +50,14 @@ void fm_SynthEngine::render (juce::AudioBuffer<float>& buffer, const int startSa
 
 void fm_SynthEngine::update()
 {
-    // Currently empty, but will give new parameters in future
+    parameters.update();
+
+    for (auto& voice : voices)
+    {
+        voice.setModulation (parameters.modulatorIndex, parameters.modulatorDepth);
+        voice.setADSR (parameters.carrierAttackTime, parameters.carrierDecayTime, parameters.carrierSustainLevel, parameters.carrierReleaseTime);
+        voice.setModulationFeedback (parameters.modulatorFeedback);
+    }
 }
 
 void fm_SynthEngine::allNotesOff()

@@ -20,7 +20,7 @@ SynthAudioProcessor::SynthAudioProcessor()
                           .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
     #endif
               ),
-      parameterTree (*this, nullptr, "Parameters", fm_Parameters<float>::createParameterLayout()),
+      parameterTree (*this, nullptr, "Parameters", fm_Parameters::createParameterLayout()),
       params(parameterTree),
       SynthEngine(params)
 #endif
@@ -141,18 +141,12 @@ void SynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    if (bool expected = true; isNonRealtime()) {
-        update(); // This function is used to update parameters
+    if (bool expected = true; parametersChanged.compare_exchange_strong (expected, false) || isNonRealtime()) {
+        SynthEngine.update(); // This function is used to update parameters
     }
 
     // Process MIDI events - render is held in this too
     SynthEngine.processBlock(buffer, midiMessageList);
-}
-
-bool SynthAudioProcessor::update()
-{
-    SynthEngine.update();
-    return true;
 }
 
 //============= =================================================================

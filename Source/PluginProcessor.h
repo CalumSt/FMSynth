@@ -29,7 +29,6 @@ public:
    #endif
 
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
-    bool update();
 
     //==============================================================================
     juce::AudioProcessorEditor* createEditor() override;
@@ -57,7 +56,14 @@ public:
 private:
     fm_SynthEngine SynthEngine;
     AudioProcessorValueTreeState parameterTree;
-    fm_Parameters<float> params;
+    fm_Parameters params;
+
+    std::atomic<bool> parametersChanged { false }; // Use an atomic bool to check for any parameter changes
+    void valueTreePropertyChanged(juce::ValueTree const&, const juce::Identifier&)
+    {
+        parametersChanged.store(true);
+    }
+
     UndoManager undoManager;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthAudioProcessor)

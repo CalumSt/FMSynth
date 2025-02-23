@@ -6,11 +6,11 @@
 
 #include <JuceHeader.h>
 
-namespace ParameterID
+namespace SynthParamIDs
 {
     const juce::ParameterID carrierAttackTime { "carrierAttackTime", 1 };
     const juce::ParameterID carrierDecayTime { "carrierDecayTime", 1 };
-    const juce::ParameterID carrierSustain { "carrierSustain", 1 };
+    const juce::ParameterID carrierSustain { "carrierSustainLevel", 1 };
     const juce::ParameterID carrierReleaseTime { "carrierReleaseTime", 1 };
     const juce::ParameterID modulatorAttackTime { "modulatorAttackTime", 1 };
     const juce::ParameterID modulatorDecayTime { "modulatorDecayTime", 1 };
@@ -19,6 +19,7 @@ namespace ParameterID
     const juce::ParameterID modDepth { "modDepth", 1 };
     const juce::ParameterID modIndex { "modIndex", 1 };
     const juce::ParameterID modFeedback { "modFeedback", 1 };
+    const juce::ParameterID outputLevel { "outputLevel", 1 };
 }
 
 template<typename T>
@@ -29,14 +30,23 @@ inline void castParameter(AudioProcessorValueTreeState& apvts,
     jassert(destination);  // parameter does not exist or wrong type
 }
 
-template<typename FloatType>
 struct fm_Parameters
 {
     explicit fm_Parameters (AudioProcessorValueTreeState& apvts)
     {
         // Cast parameters
-        castParameter(apvts, juce::ParameterID("drive"), modDepthParam);
-
+        castParameter(apvts, juce::ParameterID("carrierAttackTime"), carrierAttackTimeParam);
+        castParameter(apvts, juce::ParameterID("carrierDecayTime"), carrierDecayTimeParam);
+        castParameter(apvts, juce::ParameterID("carrierSustainLevel"), carrierSustainLevelParam);
+        castParameter(apvts, juce::ParameterID("carrierReleaseTime"), carrierReleaseTimeParam);
+        castParameter (apvts, juce::ParameterID("modulatorAttackTime"), modulatorAttackTimeParam);
+        castParameter (apvts, juce::ParameterID("modulatorDecayTime"), modulatorDecayTimeParam);
+        castParameter (apvts, juce::ParameterID("modulatorSustain"), modulatorSustainParam);
+        castParameter (apvts, juce::ParameterID("modulatorReleaseTime"), modulatorReleaseTimeParam);
+        castParameter (apvts, juce::ParameterID("modDepth"), modDepthParam);
+        castParameter (apvts, juce::ParameterID("modIndex"), modIndexParam);
+        castParameter (apvts, juce::ParameterID("modFeedback"), modFeedbackParam);
+        castParameter (apvts, juce::ParameterID("outputLevel"), outputLevelParam);
     }
 
 
@@ -44,22 +54,134 @@ struct fm_Parameters
     {
         AudioProcessorValueTreeState::ParameterLayout layout;
 
+        layout.add (std::make_unique<juce::AudioParameterFloat> (
+            SynthParamIDs::carrierAttackTime,
+            "Carrier Attack Time",
+            NormalisableRange<float> (0.0f, 1.0f),
+            0.0f,
+            juce::AudioParameterFloatAttributes().withLabel("sec")));
+
+        layout.add (std::make_unique<juce::AudioParameterFloat> (
+            SynthParamIDs::carrierDecayTime,
+            "Carrier Decay Time",
+            NormalisableRange<float> (0.0f, 1.0f),
+            0.0f,
+            juce::AudioParameterFloatAttributes().withLabel("sec")));
+
+        layout.add (std::make_unique<juce::AudioParameterFloat> (
+            SynthParamIDs::carrierSustain,
+            "Carrier Sustain Level",
+            NormalisableRange<float> (0.0f, 1.0f),
+            1.0f,
+            juce::AudioParameterFloatAttributes().withLabel("%")));
+
+        layout.add (std::make_unique<juce::AudioParameterFloat> (
+            SynthParamIDs::carrierReleaseTime,
+            "Carrier Release Time",
+            NormalisableRange<float> (0.0f, 1.0f),
+            0.0f,
+            juce::AudioParameterFloatAttributes().withLabel("sec")));
+
+        layout.add (std::make_unique<juce::AudioParameterFloat> (
+            SynthParamIDs::modulatorAttackTime,
+            "Modulator Attack Time",
+            NormalisableRange<float> (0.0f, 1.0f),
+            0.0f,
+            juce::AudioParameterFloatAttributes().withLabel("sec")));
+
+        layout.add (std::make_unique<juce::AudioParameterFloat> (
+            SynthParamIDs::modulatorDecayTime,
+            "Modulator Decay Time",
+            NormalisableRange<float> (0.0f, 1.0f),
+            0.0f,
+            juce::AudioParameterFloatAttributes().withLabel("sec")));
+
+        layout.add (std::make_unique<juce::AudioParameterFloat> (
+            SynthParamIDs::modulatorSustain,
+            "Modulator Sustain Level",
+            NormalisableRange<float> (0.0f, 1.0f),
+            1.0f,
+            juce::AudioParameterFloatAttributes().withLabel("%")));
+
+        layout.add (std::make_unique<juce::AudioParameterFloat> (
+            SynthParamIDs::modulatorReleaseTime,
+            "Modulator Release Time",
+            NormalisableRange<float> (0.0f, 1.0f),
+            0.0f,
+            juce::AudioParameterFloatAttributes().withLabel("sec")));
+
+        layout.add (std::make_unique<juce::AudioParameterFloat> (
+            SynthParamIDs::modDepth,
+            "Modulator Depth",
+            NormalisableRange<float> (0.0f, 100.0f),
+            0.0f,
+            juce::AudioParameterFloatAttributes().withLabel("%")));
+
+        layout.add (std::make_unique<juce::AudioParameterFloat> (
+            SynthParamIDs::modIndex,
+            "Modulator Index",
+            NormalisableRange<float> (0.0f, 100.0f),
+            0.0f,
+            juce::AudioParameterFloatAttributes().withLabel("%")));
+
+        layout.add (std::make_unique<juce::AudioParameterFloat> (
+            SynthParamIDs::modFeedback,
+            "Modulator Feedback",
+            NormalisableRange<float> (0.0f, 100.0f),
+            0.0f,
+            juce::AudioParameterFloatAttributes().withLabel("%")));
+
+        layout.add (std::make_unique<juce::AudioParameterFloat> (
+            SynthParamIDs::outputLevel,
+            "Output Level",
+            NormalisableRange<float> (0.0f, 100.0f),
+            100.0f,
+            juce::AudioParameterFloatAttributes().withLabel("%")));
+
         return layout;
     }
 
-    void prepareToPlay(float sampleRate) noexcept;
-    void reset() noexcept;  /// TODO: Implement me!
-    void update() noexcept; /// TODO: Implement me!
+    void reset() noexcept
+    {
+        carrierAttackTime   = CASPI::Constants::zero<float>;      // 0 - 1
+        carrierDecayTime    = CASPI::Constants::zero<float>;      // 0 - 1
+        carrierSustainLevel = CASPI::Constants::one<float>;      // 0 - 1
+        carrierReleaseTime  = CASPI::Constants::zero<float>;      // 0 - 1
 
+        modulatorAttackTime   = CASPI::Constants::zero<float>;      // 0 - 1
+        modulatorDecayTime    = CASPI::Constants::zero<float>;      // 0 - 1
+        modulatorSustainLevel = CASPI::Constants::one<float>;      // 0 - 1
+        modulatorReleaseTime  = CASPI::Constants::zero<float>;      // 0 - 1
+
+        modulatorDepth    = CASPI::Constants::zero<float>;      // 0 - 1
+        modulatorIndex    = CASPI::Constants::zero<float>;      // 0 - 1
+        modulatorFeedback = CASPI::Constants::zero<float>;      // 0 - 1
+
+        outputLevel = CASPI::Constants::one<float>;      // 0 - 1
+    }
+    void update()
+    {
+        carrierAttackTime = carrierAttackTimeParam->get();
+        carrierDecayTime = carrierDecayTimeParam->get();
+        carrierSustainLevel = carrierSustainLevelParam->get();
+        carrierReleaseTime = carrierReleaseTimeParam->get();
+        modulatorAttackTime = modulatorAttackTimeParam->get();
+        modulatorDecayTime = modulatorDecayTimeParam->get();
+        modulatorSustainLevel = modulatorSustainParam->get();
+        modulatorReleaseTime = modulatorReleaseTimeParam->get();
+        modulatorDepth = modDepthParam->get();
+        modulatorIndex = modIndexParam->get();
+        modulatorFeedback = modFeedbackParam->get();
+        outputLevel = outputLevelParam->get();
+    }
     void randomize() noexcept; /// TODO: Implement me!
 
     // *** Plug-in parameters ***
-private:
 
     // *** Carrier parameters ***
     AudioParameterFloat* carrierAttackTimeParam;
     AudioParameterFloat* carrierDecayTimeParam;
-    AudioParameterFloat* carrierSustainParam;
+    AudioParameterFloat* carrierSustainLevelParam;
     AudioParameterFloat* carrierReleaseTimeParam;
 
     // *** Modulator parameters ***
@@ -81,22 +203,22 @@ private:
 
     // *** Parameter values ***
 
-    FloatType sampleRate = CASPI::Constants::DEFAULT_SAMPLE_RATE<FloatType>;
-    FloatType carrierAttackTime   = CASPI::Constants::zero<FloatType>;      // 0 - 1
-    FloatType carrierDecayTime    = CASPI::Constants::zero<FloatType>;      // 0 - 1
-    FloatType carrierSustainLevel = CASPI::Constants::one<FloatType>;      // 0 - 1
-    FloatType carrierReleaseTime  = CASPI::Constants::zero<FloatType>;      // 0 - 1
+    float carrierAttackTime   = CASPI::Constants::zero<float>;      // 0 - 1
+    float carrierDecayTime    = CASPI::Constants::zero<float>;      // 0 - 1
+    float carrierSustainLevel = CASPI::Constants::one<float>;      // 0 - 1
+    float carrierReleaseTime  = CASPI::Constants::zero<float>;      // 0 - 1
 
-    FloatType modulatorAttackTime   = CASPI::Constants::zero<FloatType>;      // 0 - 1
-    FloatType modulatorDecayTime    = CASPI::Constants::zero<FloatType>;      // 0 - 1
-    FloatType modulatorSustainLevel = CASPI::Constants::one<FloatType>;      // 0 - 1
-    FloatType modulatorReleaseTime  = CASPI::Constants::zero<FloatType>;      // 0 - 1
+    float modulatorAttackTime   = CASPI::Constants::zero<float>;      // 0 - 1
+    float modulatorDecayTime    = CASPI::Constants::zero<float>;      // 0 - 1
+    float modulatorSustainLevel = CASPI::Constants::one<float>;      // 0 - 1
+    float modulatorReleaseTime  = CASPI::Constants::zero<float>;      // 0 - 1
 
-    FloatType modulatorDepth    = CASPI::Constants::zero<FloatType>;      // 0 - 1
-    FloatType modulatorIndex    = CASPI::Constants::zero<FloatType>;      // 0 - 1
-    FloatType modulatorFeedback = CASPI::Constants::zero<FloatType>;      // 0 - 1
+    float modulatorDepth    = CASPI::Constants::zero<float>;      // 0 - 1
+    float modulatorIndex    = CASPI::Constants::zero<float>;      // 0 - 1
+    float modulatorFeedback = CASPI::Constants::zero<float>;      // 0 - 1
 
-    FloatType outputLevel = CASPI::Constants::zero<FloatType>;      // 0 - 1
+    float outputLevel = CASPI::Constants::one<float>;      // 0 - 1
+
 
 };
 
