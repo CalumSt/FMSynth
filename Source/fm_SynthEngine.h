@@ -46,9 +46,12 @@ public:
     void update();
     void setSampleRate (const float newSampleRate)
     {
-        sampleRate = newSampleRate;
+        parameters.sampleRate = newSampleRate;
         for (auto & voice : voices) { voice.setSampleRate (newSampleRate); }
     }
+
+    int getNumActiveVoices ();
+    float getGainControl ();
 
     /// MIDI - uses JUCE so is isolated here
     void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer const& midiMessageList);
@@ -57,9 +60,8 @@ public:
 private:
     // holds a pointer to an array of voices
     std::vector<fm_SynthVoice<float>> voices {128};
-
+    int numActiveVoices = 0;
     fm_Parameters& parameters;
-    float sampleRate = 44100.0f;
 };
 
 

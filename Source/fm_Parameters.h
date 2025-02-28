@@ -35,10 +35,10 @@ struct fm_Parameters
     explicit fm_Parameters (AudioProcessorValueTreeState& apvts)
     {
         // Cast parameters
-        castParameter(apvts, juce::ParameterID("carrierAttackTime"), carrierAttackTimeParam);
-        castParameter(apvts, juce::ParameterID("carrierDecayTime"), carrierDecayTimeParam);
-        castParameter(apvts, juce::ParameterID("carrierSustainLevel"), carrierSustainLevelParam);
-        castParameter(apvts, juce::ParameterID("carrierReleaseTime"), carrierReleaseTimeParam);
+        castParameter (apvts, juce::ParameterID("carrierAttackTime"), carrierAttackTimeParam);
+        castParameter (apvts, juce::ParameterID("carrierDecayTime"), carrierDecayTimeParam);
+        castParameter (apvts, juce::ParameterID("carrierSustainLevel"), carrierSustainLevelParam);
+        castParameter (apvts, juce::ParameterID("carrierReleaseTime"), carrierReleaseTimeParam);
         castParameter (apvts, juce::ParameterID("modulatorAttackTime"), modulatorAttackTimeParam);
         castParameter (apvts, juce::ParameterID("modulatorDecayTime"), modulatorDecayTimeParam);
         castParameter (apvts, juce::ParameterID("modulatorSustain"), modulatorSustainParam);
@@ -58,7 +58,7 @@ struct fm_Parameters
             SynthParamIDs::carrierAttackTime,
             "Carrier Attack Time",
             NormalisableRange<float> (0.0f, 1.0f),
-            0.0f,
+            0.02f,
             juce::AudioParameterFloatAttributes().withLabel("sec")));
 
         layout.add (std::make_unique<juce::AudioParameterFloat> (
@@ -71,15 +71,15 @@ struct fm_Parameters
         layout.add (std::make_unique<juce::AudioParameterFloat> (
             SynthParamIDs::carrierSustain,
             "Carrier Sustain Level",
-            NormalisableRange<float> (0.0f, 1.0f),
-            1.0f,
+            NormalisableRange<float> (0.0f, 100.0f),
+            80.0f,
             juce::AudioParameterFloatAttributes().withLabel("%")));
 
         layout.add (std::make_unique<juce::AudioParameterFloat> (
             SynthParamIDs::carrierReleaseTime,
             "Carrier Release Time",
             NormalisableRange<float> (0.0f, 1.0f),
-            0.0f,
+            0.02f,
             juce::AudioParameterFloatAttributes().withLabel("sec")));
 
         layout.add (std::make_unique<juce::AudioParameterFloat> (
@@ -99,8 +99,8 @@ struct fm_Parameters
         layout.add (std::make_unique<juce::AudioParameterFloat> (
             SynthParamIDs::modulatorSustain,
             "Modulator Sustain Level",
-            NormalisableRange<float> (0.0f, 1.0f),
-            1.0f,
+            NormalisableRange<float> (0.0f, 100.0f),
+            80.0f,
             juce::AudioParameterFloatAttributes().withLabel("%")));
 
         layout.add (std::make_unique<juce::AudioParameterFloat> (
@@ -120,9 +120,9 @@ struct fm_Parameters
         layout.add (std::make_unique<juce::AudioParameterFloat> (
             SynthParamIDs::modIndex,
             "Modulator Index",
-            NormalisableRange<float> (0.0f, 100.0f),
-            0.0f,
-            juce::AudioParameterFloatAttributes().withLabel("%")));
+            NormalisableRange<float> (0.01f, 2.0f),
+            1.0f,
+            juce::AudioParameterFloatAttributes().withLabel("Index")));
 
         layout.add (std::make_unique<juce::AudioParameterFloat> (
             SynthParamIDs::modFeedback,
@@ -161,18 +161,19 @@ struct fm_Parameters
     }
     void update()
     {
-        carrierAttackTime = carrierAttackTimeParam->get();
-        carrierDecayTime = carrierDecayTimeParam->get();
-        carrierSustainLevel = carrierSustainLevelParam->get();
-        carrierReleaseTime = carrierReleaseTimeParam->get();
-        modulatorAttackTime = modulatorAttackTimeParam->get();
-        modulatorDecayTime = modulatorDecayTimeParam->get();
-        modulatorSustainLevel = modulatorSustainParam->get();
-        modulatorReleaseTime = modulatorReleaseTimeParam->get();
-        modulatorDepth = modDepthParam->get();
-        modulatorIndex = modIndexParam->get();
-        modulatorFeedback = modFeedbackParam->get();
-        outputLevel = outputLevelParam->get();
+        carrierAttackTime     = carrierAttackTimeParam->get();
+        carrierDecayTime      = carrierDecayTimeParam->get();
+        carrierSustainLevel   = carrierSustainLevelParam->get() / 100.0f;
+        carrierReleaseTime    = carrierReleaseTimeParam->get();
+        modulatorAttackTime   = modulatorAttackTimeParam->get();
+        modulatorDecayTime    = modulatorDecayTimeParam->get();
+        modulatorSustainLevel = modulatorSustainParam->get() / 100.0f;
+        modulatorReleaseTime  = modulatorReleaseTimeParam->get();
+
+        modulatorDepth    = modDepthParam->get() / 100.0f;
+        modulatorIndex    = modIndexParam->get();
+        modulatorFeedback = modFeedbackParam->get() / 100.0f;
+        outputLevel       = outputLevelParam->get() / 100.0f;
     }
     void randomize() noexcept; /// TODO: Implement me!
 
@@ -214,10 +215,12 @@ struct fm_Parameters
     float modulatorReleaseTime  = CASPI::Constants::zero<float>;      // 0 - 1
 
     float modulatorDepth    = CASPI::Constants::zero<float>;      // 0 - 1
-    float modulatorIndex    = CASPI::Constants::zero<float>;      // 0 - 1
+    float modulatorIndex    = CASPI::Constants::one<float>;      // 0.1 - 2
     float modulatorFeedback = CASPI::Constants::zero<float>;      // 0 - 1
 
     float outputLevel = CASPI::Constants::one<float>;      // 0 - 1
+
+    float sampleRate  = CASPI::Constants::DEFAULT_SAMPLE_RATE<float>;
 
 
 };

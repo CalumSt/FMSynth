@@ -20,15 +20,18 @@ SynthAudioProcessor::SynthAudioProcessor()
                           .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
     #endif
               ),
+      SynthEngine(params),
       parameterTree (*this, nullptr, "Parameters", fm_Parameters::createParameterLayout()),
-      params(parameterTree),
-      SynthEngine(params)
+      params(parameterTree)
+
 #endif
 {
+    parameterTree.state.addListener(this);
 }
 
 SynthAudioProcessor::~SynthAudioProcessor()
 {
+    parameterTree.state.removeListener(this);
 }
 
 //==============================================================================
@@ -82,6 +85,7 @@ int SynthAudioProcessor::getCurrentProgram()
 
 void SynthAudioProcessor::setCurrentProgram (int index)
 {
+    // Programs and presets not yet implemented!
 }
 
 const juce::String SynthAudioProcessor::getProgramName (int index)
@@ -91,6 +95,7 @@ const juce::String SynthAudioProcessor::getProgramName (int index)
 
 void SynthAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
+    // Programs and presets not yet implemented!
 }
 
 //==============================================================================
@@ -98,6 +103,7 @@ void SynthAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     SynthEngine.initialiseVoices();
     SynthEngine.setSampleRate(static_cast<float>(sampleRate));
+    parametersChanged.store(true);
 }
 
 void SynthAudioProcessor::releaseResources()
@@ -142,8 +148,11 @@ void SynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
         buffer.clear (i, 0, buffer.getNumSamples());
 
     if (bool expected = true; parametersChanged.compare_exchange_strong (expected, false) || isNonRealtime()) {
-        SynthEngine.update(); // This function is used to update parameters
+         // This function is used to update parameters
+        SynthEngine.update();
     }
+
+
 
     // Process MIDI events - render is held in this too
     SynthEngine.processBlock(buffer, midiMessageList);
@@ -157,7 +166,7 @@ bool SynthAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SynthAudioProcessor::createEditor()
 {
-    return new SynthAudioProcessorEditor (*this);
+    return new GenericAudioProcessorEditor (*this);
 }
 
 //==============================================================================
@@ -166,12 +175,20 @@ void SynthAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    const auto state = parameterTree.copyState();
+    const std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    copyXmlToBinary (*xml, destData);
 }
 
 void SynthAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+        if (xmlState->hasTagName (parameterTree.state.getType()))
+            parameterTree.replaceState (juce::ValueTree::fromXml (*xmlState));
 }
 
 //==============================================================================

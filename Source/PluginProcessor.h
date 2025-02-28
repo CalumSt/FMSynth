@@ -13,7 +13,7 @@
 #include "fm_Parameters.h"
 
 //==============================================================================
-class SynthAudioProcessor  : public juce::AudioProcessor
+class SynthAudioProcessor  : public juce::AudioProcessor, private juce::ValueTree::Listener
 {
 public:
     //==============================================================================
@@ -59,8 +59,9 @@ private:
     fm_Parameters params;
 
     std::atomic<bool> parametersChanged { false }; // Use an atomic bool to check for any parameter changes
-    void valueTreePropertyChanged(juce::ValueTree const&, const juce::Identifier&)
+    void valueTreePropertyChanged(juce::ValueTree&, const juce::Identifier&) override
     {
+        DBG("parameters changed");
         parametersChanged.store(true);
     }
 

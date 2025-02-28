@@ -8,8 +8,8 @@ void fm_SynthEngine::reset()
     {
         voice.reset();
     }
-
     parameters.reset();
+    numActiveVoices = getNumActiveVoices();
 
 }
 
@@ -18,25 +18,30 @@ void fm_SynthEngine::noteOn (const int note, const int velocity)
     // call the voice's noteOn function, using the note num number as the voice index
     const auto voiceIndex = note - 1;
     voices.at(voiceIndex).noteOn (note, velocity);
+    ++numActiveVoices;
 }
 
 void fm_SynthEngine::noteOff (const int note)
 {
     const auto voiceIndex = note - 1;
     voices.at(voiceIndex).noteOff ();
+    --numActiveVoices;
 }
 
 void fm_SynthEngine::render (juce::AudioBuffer<float>& buffer, const int startSample, const int endSample)
 {
     auto* firstChannel = buffer.getWritePointer (0);
 
+    auto const gain = getGainControl();
+
     for (auto& voice : voices)
     {
         if (voice.isActive())
         {
-            for (auto sample = startSample; sample < endSample; ++sample)
+            for (auto sampleIdx = startSample; sampleIdx < endSample; ++sampleIdx)
             {
-                firstChannel[sample] += parameters.outputLevel * voice.render();
+                auto sample = voice.render();
+                firstChannel[sampleIdx] += gain * sample;
             }
         }
     }
@@ -54,9 +59,12 @@ void fm_SynthEngine::update()
 
     for (auto& voice : voices)
     {
-        voice.setModulation (parameters.modulatorIndex, parameters.modulatorDepth);
-        voice.setADSR (parameters.carrierAttackTime, parameters.carrierDecayTime, parameters.carrierSustainLevel, parameters.carrierReleaseTime);
-        voice.setModulationFeedback (parameters.modulatorFeedback);
+        if (voice.isActive())
+        {
+            voice.setModulation (parameters.modulatorIndex, parameters.modulatorDepth);
+            voice.setADSR (parameters.carrierAttackTime, parameters.carrierDecayTime, parameters.carrierSustainLevel, parameters.carrierReleaseTime);
+            voice.setModulationFeedback (parameters.modulatorFeedback);
+        }
     }
 }
 
@@ -67,6 +75,21 @@ void fm_SynthEngine::allNotesOff()
         voice.noteOff();
     }
 
+    getNumActiveVoices();
+
+}
+
+int fm_SynthEngine::getNumActiveVoices ()
+{
+    numActiveVoices = 0;
+    for (auto const& voice : voices)
+    {
+        if (voice.isActive())
+        {
+            numActiveVoices++;
+        }
+    }
+    return numActiveVoices;
 }
 
 void fm_SynthEngine::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer const& midiMessageList)
@@ -123,6 +146,13 @@ void fm_SynthEngine::initialiseVoices ()
     for (auto& voice : voices)
     {
         voice.setADSR (0.01f, 0.1f, 0.8f, 0.2f);
-        voice.setSampleRate (sampleRate);
+        voice.setSampleRate (parameters.sampleRate);
     }
+}
+
+float fm_SynthEngine::getGainControl ()
+{
+    const auto activeVoices = static_cast<float> (getNumActiveVoices());
+    const auto gain = parameters.outputLevel / (0.5f * activeVoices + 0.5f );
+    return std::clamp(gain, 0.0f, 1.0f);
 }

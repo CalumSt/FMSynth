@@ -43,22 +43,18 @@ class fm_SynthVoice
         {
             note = _note;
             velocity = _velocity;
+            Gain.setGain (1.0, sampleRate);
+            Gain.setGainRampDuration (static_cast<FloatType> (0.002),sampleRate);
             auto frequency = CASPI::Maths::midiNoteToHz<FloatType> (note);
-            auto modIndex = static_cast<FloatType> (0.50); /// CHANGE ME
             Oscillator.setFrequency (frequency, sampleRate);
-            Oscillator.setModulation (modIndex, static_cast<FloatType> (0.25));
             Oscillator.enableADSR(Carrier);
             Oscillator.noteOn();
-            Gain.setGainRampDuration (static_cast<FloatType> (0.003),sampleRate); // Suppress audible pops
-            Gain.setGain (static_cast<FloatType> (0.75), sampleRate);
             active = true;
         }
 
         void noteOff()
         {
             Oscillator.noteOff();
-            Gain.setGainRampDuration (static_cast<FloatType> (0.002),sampleRate); // Suppress audible pops
-            Gain.setGain (CASPI::Constants::zero<FloatType>, sampleRate);
             active = false;
         }
 
