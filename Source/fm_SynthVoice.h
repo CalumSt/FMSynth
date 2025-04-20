@@ -27,16 +27,15 @@
 #pragma once
 #include "Synthesizers/caspi_PMAlgorithm.h"
 #include "Utilities/caspi_Maths.h"
-#include "Utilities/caspi_Gain.h"
-#include "Oscillators/caspi_BlepOscillator.h"
+#include "Gain/caspi_Gain.h"
 
 template <typename FloatType>
 class fm_SynthVoice
 {
-    using enum CASPI::PM::Algorithms::BasicCascadeOpCodes;
+    using enum CASPI::PM::Algorithms::OpIndex;
     public:
         CASPI::Gain<FloatType> Gain;
-        CASPI::PM::Algorithms::BasicCascade<FloatType> Oscillator;
+        CASPI::PM::Algorithms::TwoOperatorAlgs<FloatType> Oscillator;
 
         // methods
         void noteOn(const int _note, const int _velocity)
@@ -47,7 +46,7 @@ class fm_SynthVoice
             Gain.setGainRampDuration (static_cast<FloatType> (0.002),sampleRate);
             auto frequency = CASPI::Maths::midiNoteToHz<FloatType> (note);
             Oscillator.setFrequency (frequency, sampleRate);
-            Oscillator.enableADSR(Carrier);
+            Oscillator.enableADSR(OpB);
             Oscillator.noteOn();
             active = true;
         }
@@ -88,7 +87,7 @@ class fm_SynthVoice
             Gain.setSampleRate (_sampleRate);
         }
         /// Modulation setters
-        void setModulationFeedback(FloatType modFeedback) { Oscillator.setModulationFeedback (modFeedback);};
+        void setModulationFeedback(FloatType modFeedback) { Oscillator.setModulationFeedback (OpA, modFeedback);};
         // this might need to be changed in future to account for different algorithms!
         void setModulation(FloatType modIndex, FloatType modDepth) { Oscillator.setModulation(modIndex, modDepth);};
 
@@ -100,10 +99,10 @@ class fm_SynthVoice
             setReleaseTime (_releaseTime);
         }
         // just use Carrier ADSR for now
-        void setAttackTime(FloatType _attackTime) { Oscillator.setAttackTime (Carrier,_attackTime); }
-        void setDecayTime(FloatType _decayTime) { Oscillator.setDecayTime (Carrier,_decayTime); }
-        void setSustainLevel(FloatType _sustainLevel) { Oscillator.setSustainLevel (Carrier,_sustainLevel); }
-        void setReleaseTime(FloatType _releaseLevel) { Oscillator.setReleaseTime (Carrier,_releaseLevel); }
+        void setAttackTime(FloatType _attackTime) { Oscillator.setAttackTime (OpB,_attackTime); }
+        void setDecayTime(FloatType _decayTime) { Oscillator.setDecayTime (OpB,_decayTime); }
+        void setSustainLevel(FloatType _sustainLevel) { Oscillator.setSustainLevel (OpB,_sustainLevel); }
+        void setReleaseTime(FloatType _releaseLevel) { Oscillator.setReleaseTime (OpB,_releaseLevel); }
 
         [[nodiscard]] int getNote() const { return note; }
         [[nodiscard]] int getVelocity() const { return velocity; }

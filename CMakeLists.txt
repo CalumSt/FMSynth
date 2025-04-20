@@ -35,6 +35,7 @@ juce_add_plugin(${PROJECT_NAME}
     COMPANY_NAME ${COMPANY_NAME}                # Specify the name of the plugin's author
     IS_SYNTH TRUE                               # Is this a synth or an effect?
     NEEDS_MIDI_INPUT TRUE                       # Does the plugin need midi input?
+    NEEDS_WEBVIEW2 TRUE
     # NEEDS_MIDI_OUTPUT TRUE/FALSE              # Does the plugin need midi output?
     # IS_MIDI_EFFECT TRUE/FALSE                 # Is this plugin a MIDI effect?
     # EDITOR_WANTS_KEYBOARD_FOCUS TRUE/FALSE    # Does the editor need keyboard focus?
@@ -67,9 +68,11 @@ target_link_libraries(${PROJECT_NAME}
 target_compile_definitions(${PROJECT_NAME}
     PUBLIC
         # JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
-        JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
+        JUCE_WEB_BROWSER=1  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
         JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
         JUCE_VST3_CAN_REPLACE_VST2=0
+        JUCE_USE_WEBVIEW2_WITH_STATIC_LINKING=1
+        JUCE_USE_WIN_WEBVIEW2=1
 )
 target_include_directories(${PROJECT_NAME} INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}/Libs/CASPI)
 

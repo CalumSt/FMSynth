@@ -8,17 +8,27 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-
+constexpr int FIXED_HEIGHT = 400;
+constexpr int FIXED_WIDTH = 900;
 //==============================================================================
 SynthAudioProcessorEditor::SynthAudioProcessorEditor (SynthAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+    : AudioProcessorEditor (&p), audioProcessor (p), leftDialArea(p)
 {
-    setSize (400, 300);
+    juce::LookAndFeel::setDefaultLookAndFeel (&style);
+
+    setSize (FIXED_WIDTH, FIXED_HEIGHT);
+
+    addAndMakeVisible (header);
+
+    addAndMakeVisible (tooltip);
+
+    addAndMakeVisible (leftDialArea);
+
+    addAndMakeVisible (rightDialArea);
 }
 
 SynthAudioProcessorEditor::~SynthAudioProcessorEditor()
-{
-}
+= default;
 
 //==============================================================================
 void SynthAudioProcessorEditor::paint (juce::Graphics& g)
@@ -26,13 +36,36 @@ void SynthAudioProcessorEditor::paint (juce::Graphics& g)
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (juce::Colours::black);
 
-    g.setColour (juce::Colours::white);
-    g.setFont (juce::FontOptions (15.0f));
-    g.drawFittedText ("This is an FM Synth", getLocalBounds(), juce::Justification::centred, 1);
+    g.setColour (juce::Colours::yellow);
+
+    header.paint(g);
+
+    g.setColour (juce::Colours::red);
+
+    g.setColour (juce::Colours::blue);
+    leftDialArea.paint(g);
+
+    g.setColour (juce::Colours::green);
+    rightDialArea.paint(g);
+
+    g.setColour (juce::Colours::grey);
+    g.setFont (BinaryData::Font::getCustomFontLight());
+
 }
 
 void SynthAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+    // subcomponents in your editor...
+
+    auto area = getLocalBounds();
+
+    header.setBounds(area.removeFromTop (FIXED_HEIGHT / 10));
+
+    tooltip.setBounds(area.removeFromBottom (FIXED_HEIGHT / 10));
+
+    leftDialArea.setBounds(area.removeFromLeft (FIXED_WIDTH / 2));
+
+    rightDialArea.setBounds(area.removeFromRight (FIXED_WIDTH / 2));
+
 }

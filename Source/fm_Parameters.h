@@ -8,18 +8,20 @@
 
 namespace SynthParamIDs
 {
-    const juce::ParameterID carrierAttackTime { "carrierAttackTime", 1 };
-    const juce::ParameterID carrierDecayTime { "carrierDecayTime", 1 };
-    const juce::ParameterID carrierSustain { "carrierSustainLevel", 1 };
-    const juce::ParameterID carrierReleaseTime { "carrierReleaseTime", 1 };
-    const juce::ParameterID modulatorAttackTime { "modulatorAttackTime", 1 };
-    const juce::ParameterID modulatorDecayTime { "modulatorDecayTime", 1 };
-    const juce::ParameterID modulatorSustain { "modulatorSustain", 1 };
-    const juce::ParameterID modulatorReleaseTime { "modulatorReleaseTime", 1 };
-    const juce::ParameterID modDepth { "modDepth", 1 };
-    const juce::ParameterID modIndex { "modIndex", 1 };
-    const juce::ParameterID modFeedback { "modFeedback", 1 };
-    const juce::ParameterID outputLevel { "outputLevel", 1 };
+    #define PARAMETER_ID(str) const juce::ParameterID str(#str, 1);
+    PARAMETER_ID(carrierAttackTime)
+    PARAMETER_ID(carrierDecayTime)
+    PARAMETER_ID(carrierSustain)
+    PARAMETER_ID(carrierReleaseTime)
+    PARAMETER_ID(modulatorAttackTime)
+    PARAMETER_ID(modulatorDecayTime)
+    PARAMETER_ID(modulatorSustain)
+    PARAMETER_ID(modulatorReleaseTime)
+    PARAMETER_ID(modDepth)
+    PARAMETER_ID(modIndex)
+    PARAMETER_ID(modFeedback)
+    PARAMETER_ID(outputLevel)
+    #undef PARAMETER_ID
 }
 
 template<typename T>
@@ -37,7 +39,7 @@ struct fm_Parameters
         // Cast parameters
         castParameter (apvts, juce::ParameterID("carrierAttackTime"), carrierAttackTimeParam);
         castParameter (apvts, juce::ParameterID("carrierDecayTime"), carrierDecayTimeParam);
-        castParameter (apvts, juce::ParameterID("carrierSustainLevel"), carrierSustainLevelParam);
+        castParameter (apvts, juce::ParameterID("carrierSustain"), carrierSustainLevelParam);
         castParameter (apvts, juce::ParameterID("carrierReleaseTime"), carrierReleaseTimeParam);
         castParameter (apvts, juce::ParameterID("modulatorAttackTime"), modulatorAttackTimeParam);
         castParameter (apvts, juce::ParameterID("modulatorDecayTime"), modulatorDecayTimeParam);

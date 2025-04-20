@@ -13,7 +13,6 @@ set(This Tests)
 set(SOURCES
         Test.cpp
         Voice_test.cpp
-        Voice_test.cpp
 )
 # --------------------------------------------------------------------------
 

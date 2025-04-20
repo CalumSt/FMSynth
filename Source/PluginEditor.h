@@ -10,15 +10,17 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
-#include "GUI/ModulatorLookAndFeel.h"
+#include "GUI/LookAndFeel.h"
+
+#include "GUI/Font.h"
+#include "GUI/Components.h"
 
 //==============================================================================
-/**
-*/
+
 class SynthAudioProcessorEditor  : public juce::AudioProcessorEditor
 {
 public:
-    SynthAudioProcessorEditor (SynthAudioProcessor&);
+    explicit SynthAudioProcessorEditor (SynthAudioProcessor&);
     ~SynthAudioProcessorEditor() override;
 
     //==============================================================================
@@ -30,7 +32,18 @@ private:
     // access the processor object that created it.
     SynthAudioProcessor& audioProcessor;
 
-    // GUI components
+    ModulatorLookAndFeel style; // Look and Feel
+
+    Header header;
+
+    TooltipWindow tooltip;
+
+    DialArea leftDialArea;
+
+    DrawableRectangle rightDialArea;
+
+
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthAudioProcessorEditor)
 };

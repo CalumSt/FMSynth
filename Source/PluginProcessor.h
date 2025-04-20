@@ -53,15 +53,16 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    AudioProcessorValueTreeState parameterTree;
+
 private:
     fm_SynthEngine SynthEngine;
-    AudioProcessorValueTreeState parameterTree;
+
     fm_Parameters params;
 
     std::atomic<bool> parametersChanged { false }; // Use an atomic bool to check for any parameter changes
     void valueTreePropertyChanged(juce::ValueTree&, const juce::Identifier&) override
     {
-        DBG("parameters changed");
         parametersChanged.store(true);
     }
 

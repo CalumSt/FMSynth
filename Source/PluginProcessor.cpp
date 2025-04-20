@@ -166,7 +166,7 @@ bool SynthAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* SynthAudioProcessor::createEditor()
 {
-    return new GenericAudioProcessorEditor (*this);
+    return new SynthAudioProcessorEditor (*this);
 }
 
 //==============================================================================
