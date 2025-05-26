@@ -10,10 +10,6 @@
 
 #include "LookAndFeel.h"
 
-#define BLACK 0, 0, 0
-#define PALE_ORANGE 225, 206, 90
-#define GREY 181, 181, 181
-
 ModulatorLookAndFeel::ModulatorLookAndFeel()
 {
     setColour(juce::ResizableWindow::backgroundColourId, juce::Colour(BLACK));

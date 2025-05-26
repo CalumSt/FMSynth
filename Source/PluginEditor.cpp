@@ -24,7 +24,7 @@ SynthAudioProcessorEditor::SynthAudioProcessorEditor (SynthAudioProcessor& p)
 
     addAndMakeVisible (leftDialArea);
 
-    addAndMakeVisible (rightDialArea);
+    addAndMakeVisible (testArea);
 }
 
 SynthAudioProcessorEditor::~SynthAudioProcessorEditor()
@@ -35,10 +35,10 @@ void SynthAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (juce::Colours::black);
-
+    g.setFont (BinaryData::Font::getCustomFontRegular());
     g.setColour (juce::Colours::yellow);
 
-    header.paint(g);
+    //header.paint(g);
 
     g.setColour (juce::Colours::red);
 
@@ -46,10 +46,10 @@ void SynthAudioProcessorEditor::paint (juce::Graphics& g)
     leftDialArea.paint(g);
 
     g.setColour (juce::Colours::green);
-    rightDialArea.paint(g);
+    testArea.paint(g);
 
     g.setColour (juce::Colours::grey);
-    g.setFont (BinaryData::Font::getCustomFontLight());
+
 
 }
 
@@ -66,6 +66,6 @@ void SynthAudioProcessorEditor::resized()
 
     leftDialArea.setBounds(area.removeFromLeft (FIXED_WIDTH / 2));
 
-    rightDialArea.setBounds(area.removeFromRight (FIXED_WIDTH / 2));
+    testArea.setBounds(area.removeFromRight (FIXED_WIDTH / 2));
 
 }

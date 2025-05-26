@@ -4,6 +4,9 @@
 
 #include "Components.h"
 
+static const std::vector<juce::Colour> OperatorColours = { juce::Colour(PALE_ORANGE), juce::Colour(SEAFOAM), juce::Colour(PURPLE) };
+static const std::vector<std::string> OperatorLabels = { "A", "B", "C" };
+
 
 Header::Header()
 {
@@ -17,7 +20,7 @@ Header::~Header()
 
 void Header::paint (juce::Graphics& g)
 {
-
+    g.drawText ("Modulator", getLocalBounds(), juce::Justification::centred, true);
 }
 
 void Header::resized()
@@ -107,4 +110,72 @@ void DialArea::resized()
                    GridItem { attackDial }, GridItem { decayDial }, GridItem { sustainDial }, GridItem { releaseDial } };
 
     grid.performLayout (area);
+}
+
+OperatorButtons::OperatorButtons()
+{
+    buttons = std::vector<CustomToggleButton>(numberOfOperators);
+
+    Component::setVisible (true);
+
+    for (int i = 0; i < buttons.size(); ++i)
+    {
+        buttons[i].setButtonText (OperatorLabels[i]);
+
+        buttons[i].onClick = [this, i]() { selectButton (i); };
+
+        addAndMakeVisible (buttons[i]);
+    }
+
+    selectButton(currentOperator);
+}
+
+void OperatorButtons::paint(juce::Graphics& g)
+{
+}
+
+void OperatorButtons::resized()
+{
+    auto area = getLocalBounds();
+
+    int buttonSize = 50;
+
+    int major = 0;
+    int minor = 0;
+
+    if (isRow)
+    {
+        major = area.getWidth();
+        minor = area.getHeight();
+    }
+    else
+    {
+        major = area.getHeight();
+        minor = area.getWidth();
+    }
+
+    int majorSpacing = (major - buttonSize * buttons.size()) / (buttons.size() + 1);
+    int minorSpacing = minor - buttonSize;
+
+    int temp = majorSpacing;
+
+    for (auto & button : buttons)
+    {
+        if (isRow)
+        {
+            button.setBounds(temp, minorSpacing, buttonSize, buttonSize);
+            temp += buttonSize + majorSpacing;
+        }
+        else
+        {
+            button.setBounds(minorSpacing, temp, buttonSize, buttonSize);
+            temp += buttonSize + majorSpacing;
+        }
+    }
+}
+
+void OperatorButtons::selectButton(int index)
+{
+    for (size_t i = 0; i < buttons.size(); ++i)
+        buttons[i].setToggleState(i == index, juce::NotificationType::dontSendNotification);
 }

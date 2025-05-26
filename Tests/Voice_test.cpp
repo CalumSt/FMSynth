@@ -12,17 +12,11 @@ TEST(VoiceTests, Constructor_test) {
     EXPECT_EQ(44100.0f, voice.getSampleRate());
 }
 
-TEST(VoiceTests, SetModulation_test)
-{
-
-}
-
 TEST(VoiceTests, Render_test)
 {
     fm_SynthVoice<float> voice;
     voice.reset();
     voice.setADSR (0.5f,0.5f,0.5f,0.5f);
-    voice.setSampleRate (44100.0f);
     voice.noteOn(70,127);
 
     for (int i = 0; i < 44100; i++)

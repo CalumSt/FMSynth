@@ -147,9 +147,11 @@ void SynthAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    if (bool expected = true; parametersChanged.compare_exchange_strong (expected, false) || isNonRealtime()) {
+    bool temp = isNonRealtime();
+    SynthEngine.update();
+    if (bool expected = true; parametersChanged.compare_exchange_strong (expected, false) || temp) {
          // This function is used to update parameters
-        SynthEngine.update();
+
     }
 
 

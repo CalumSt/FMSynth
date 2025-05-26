@@ -9,6 +9,12 @@
 */
 
 #pragma once
+#define BLACK 0, 0, 0
+#define PALE_ORANGE 225, 206, 90
+#define SEAFOAM 40, 255, 177
+#define PURPLE 155, 0, 245
+#define GREY 181, 181, 181
+
 #include <JuceHeader.h>
 #include "Font.h"
 

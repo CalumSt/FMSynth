@@ -40,10 +40,7 @@ private:
 
     DialArea leftDialArea;
 
-    DrawableRectangle rightDialArea;
-
-
-
+    OperatorButtons testArea;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SynthAudioProcessorEditor)
 };
