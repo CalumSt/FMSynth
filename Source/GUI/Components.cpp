@@ -29,14 +29,14 @@ void Header::resized()
 }
 
 DialArea::DialArea (SynthAudioProcessor& audioProcessor)
-    : modDepthAttachment (audioProcessor.parameterTree, SynthParamIDs::modDepth.getParamID(), modulationDial.slider),
-      modIndexAttachment (audioProcessor.parameterTree, SynthParamIDs::modIndex.getParamID(), modIndexDial.slider),
-      modFeedbackAttachment (audioProcessor.parameterTree, SynthParamIDs::modFeedback.getParamID(), modFeedbackDial.slider),
-      tempAttachment(audioProcessor.parameterTree, SynthParamIDs::outputLevel.getParamID(), tempDial.slider),
-      attackAttachment(audioProcessor.parameterTree, SynthParamIDs::modulatorAttackTime.getParamID(), attackDial.slider),
-      decayAttachment(audioProcessor.parameterTree, SynthParamIDs::modulatorDecayTime.getParamID(), decayDial.slider),
-      sustainAttachment(audioProcessor.parameterTree, SynthParamIDs::modulatorSustain.getParamID(), sustainDial.slider),
-      releaseAttachment(audioProcessor.parameterTree, SynthParamIDs::modulatorReleaseTime.getParamID(), releaseDial.slider)
+    : modDepthAttachment (audioProcessor.parameterTree, "modDepth_OpA", modulationDial.slider),
+      modIndexAttachment (audioProcessor.parameterTree, "modIndex_OpA", modIndexDial.slider),
+      modFeedbackAttachment (audioProcessor.parameterTree, "modFeedback_OpA", modFeedbackDial.slider),
+      tempAttachment(audioProcessor.parameterTree, "outputLevel", tempDial.slider),
+      attackAttachment(audioProcessor.parameterTree, "attack_OpA", attackDial.slider),
+      decayAttachment(audioProcessor.parameterTree, "decay_OpA", decayDial.slider),
+      sustainAttachment(audioProcessor.parameterTree, "sustain_OpA", sustainDial.slider),
+      releaseAttachment(audioProcessor.parameterTree, "release_OpA", releaseDial.slider)
 {
     Component::setVisible (true);
 

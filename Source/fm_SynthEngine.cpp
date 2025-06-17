@@ -40,7 +40,7 @@ void fm_SynthEngine::render (juce::AudioBuffer<float>& buffer, const int startSa
         {
             for (auto sampleIdx = startSample; sampleIdx < endSample; ++sampleIdx)
             {
-                auto sample = voice.render();
+                auto sample              = voice.render();
                 firstChannel[sampleIdx] += gain * sample;
             }
         }
@@ -59,11 +59,12 @@ void fm_SynthEngine::update()
 
     for (auto& voice : voices)
     {
-        if (voice.isActive())
+        for (int i = 0; i < std::to_underlying(CASPI::PM::OpIndex::OpG); ++i)
         {
-            voice.setModulation (parameters.modulatorIndex, parameters.modulatorDepth);
-            voice.setADSR (parameters.carrierAttackTime, parameters.carrierDecayTime, parameters.carrierSustainLevel, parameters.carrierReleaseTime);
-            voice.setModulationFeedback (parameters.modulatorFeedback);
+            auto op = static_cast<CASPI::PM::OpIndex>(i);
+            voice.setModulation (op, parameters.get("modIndex", i), parameters.get ("modDepth", i), parameters.get ("modFeedback", i));
+            voice.setADSR (op, parameters.get("attack", i), parameters.get("decay",i), parameters.get("sustain", i), parameters.get("release",i));
+
         }
     }
 }
@@ -145,7 +146,6 @@ void fm_SynthEngine::initialiseVoices ()
 
     for (auto& voice : voices)
     {
-        voice.setADSR (0.01f, 0.1f, 0.8f, 0.2f);
         voice.setSampleRate (parameters.sampleRate);
     }
 }
@@ -153,6 +153,6 @@ void fm_SynthEngine::initialiseVoices ()
 float fm_SynthEngine::getGainControl ()
 {
     const auto activeVoices = static_cast<float> (getNumActiveVoices());
-    const auto gain = parameters.outputLevel / (0.5f * activeVoices + 0.5f );
+    const auto gain = parameters.get("outputLevel") / (0.5f * activeVoices + 0.5f );
     return std::clamp(gain, 0.0f, 1.0f);
 }

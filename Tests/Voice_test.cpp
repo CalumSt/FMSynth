@@ -16,7 +16,7 @@ TEST(VoiceTests, Render_test)
 {
     fm_SynthVoice<float> voice;
     voice.reset();
-    voice.setADSR (0.5f,0.5f,0.5f,0.5f);
+    using CASPI::PM::OpIndex;
     voice.noteOn(70,127);
 
     for (int i = 0; i < 44100; i++)

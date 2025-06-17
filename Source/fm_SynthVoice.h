@@ -25,9 +25,11 @@
 
 
 #pragma once
+#include "Gain/caspi_Gain.h"
 #include "Synthesizers/caspi_PMAlgorithm.h"
 #include "Utilities/caspi_Maths.h"
-#include "Gain/caspi_Gain.h"
+
+#include <numeric>
 
 enum class SixOperatorAlgorithmIndex : int
 {
@@ -63,7 +65,7 @@ public:
                 auto a1m3 = this->operators.at(std::to_underlying(OpD)).render();
                 auto a1m4 = this->operators.at(std::to_underlying(OpE)).render(a1m3);
                 auto a1c2 = this->operators.at(std::to_underlying(OpF)).render(a1m4);
-                out = CASPI::Maths::linearInterpolation<FloatType> (a1c1, a1c2, 0.5);
+                out = std::midpoint(a1c1, a1c2);
                 break;
             }
             // Algorithm 2: 4 operators in series, parallel with 2 operators in series
@@ -75,7 +77,7 @@ public:
                 auto a2c1 = this->operators.at(std::to_underlying(OpD)).render(a2m3);
                 auto a2m5 = this->operators.at(std::to_underlying(OpE)).render();
                 auto a2c2 = this->operators.at(std::to_underlying(OpF)).render(a2m5);
-                out = CASPI::Maths::linearInterpolation<FloatType> (a2c1, a2c2, 0.5);
+                out = std::midpoint(a2c1, a2c2);
                 break;
             }
             // 3 groups of 2 series operators
@@ -87,7 +89,7 @@ public:
                 auto a3c2 = this->operators.at(std::to_underlying(OpD)).render(a3m2);
                 auto a3m3 = this->operators.at(std::to_underlying(OpE)).render();
                 auto a3c3 = this->operators.at(std::to_underlying(OpF)).render(a3m3);
-                out = a3c1 + a3c2 + a3c3 / 3;
+                out = (a3c1 + a3c2 + a3c3) / 3;
                 break;
             }
             default:
@@ -136,7 +138,6 @@ class fm_SynthVoice
             Oscillator.setAlgorithm (SixOperatorAlgorithmIndex::Alg2);
             auto frequency = CASPI::Maths::midiNoteToHz<FloatType> (note);
             Oscillator.setFrequency (frequency, sampleRate);
-            Oscillator.enableADSR(OpB);
             Oscillator.noteOn();
             active = true;
         }
@@ -181,31 +182,33 @@ class fm_SynthVoice
             Oscillator.setAlgorithm (alg);
         }
         /// Modulation setters
-        void setModulationFeedback(FloatType modFeedback)
+        void setModulationFeedback(const CASPI::PM::OpIndex op, const FloatType modFeedback)
         {
-            Oscillator.setModulationFeedback (OpA, modFeedback);
+            Oscillator.setModulationFeedback (op, modFeedback);
         };
         // this might need to be changed in future to account for different algorithms!
-        void setModulation(FloatType modIndex, FloatType modDepth)
+        void setModulation(const CASPI::PM::OpIndex op, FloatType modIndex, FloatType modDepth)
         {
-            Oscillator.setModulation(OpA, modIndex, modDepth);
-            Oscillator.setModulation(OpB, modIndex, modDepth);
-            Oscillator.setModulation(OpC, modIndex, modDepth);
-            Oscillator.setModulation(OpE, modIndex, modDepth);
+            Oscillator.setModulation(op, modIndex, modDepth);
         };
 
-        void setADSR(FloatType _attackTime, FloatType _decayTime, FloatType _sustainLevel, FloatType _releaseTime)
+        void setModulation(const CASPI::PM::OpIndex op, const FloatType modIndex, const FloatType modDepth, const FloatType modFeedback)
         {
-            setAttackTime (_attackTime);
-            setSustainLevel (_sustainLevel);
-            setDecayTime (_decayTime);
-            setReleaseTime (_releaseTime);
+            Oscillator.setModulation(op, modIndex, modDepth, modFeedback);
+        };
+
+        void setADSR(const CASPI::PM::OpIndex op, FloatType _attackTime, FloatType _decayTime, FloatType _sustainLevel, FloatType _releaseTime)
+        {
+            setAttackTime (op, _attackTime);
+            setSustainLevel (op, _sustainLevel);
+            setDecayTime (op, _decayTime);
+            setReleaseTime (op, _releaseTime);
         }
         // just use Carrier ADSR for now
-        void setAttackTime(FloatType _attackTime) { Oscillator.setAttackTime (OpB,_attackTime); }
-        void setDecayTime(FloatType _decayTime) { Oscillator.setDecayTime (OpB,_decayTime); }
-        void setSustainLevel(FloatType _sustainLevel) { Oscillator.setSustainLevel (OpB,_sustainLevel); }
-        void setReleaseTime(FloatType _releaseLevel) { Oscillator.setReleaseTime (OpB,_releaseLevel); }
+        void setAttackTime(const CASPI::PM::OpIndex op, FloatType _attackTime) { Oscillator.setAttackTime (op,_attackTime); }
+        void setDecayTime(const CASPI::PM::OpIndex op, FloatType _decayTime) { Oscillator.setDecayTime (op,_decayTime); }
+        void setSustainLevel(const CASPI::PM::OpIndex op, FloatType _sustainLevel) { Oscillator.setSustainLevel (op,_sustainLevel); }
+        void setReleaseTime(const CASPI::PM::OpIndex op, FloatType _releaseLevel) { Oscillator.setReleaseTime (op,_releaseLevel); }
 
         [[nodiscard]] int getNote() const { return note; }
         [[nodiscard]] int getVelocity() const { return velocity; }

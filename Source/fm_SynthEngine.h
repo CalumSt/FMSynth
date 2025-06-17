@@ -62,6 +62,8 @@ private:
     std::vector<fm_SynthVoice<float>> voices {128};
     int numActiveVoices = 0;
     fm_Parameters& parameters;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(fm_SynthEngine)
 };
 
 
