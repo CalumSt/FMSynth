@@ -11,11 +11,18 @@
 #include <atomic>
 #include <unordered_map>
 
-constexpr double max_mod_depth = 1.0;
-constexpr double max_mod_index = 5.0;
-constexpr double max_mod_feedback = 1.0;
-constexpr double max_adsr_time    = 1.0;
-constexpr double min_sustain_level = 0.001;
+constexpr float max_mod_depth = 1.0f;
+constexpr float max_mod_index = 5.0f;
+constexpr float max_mod_feedback = 1.0f;
+constexpr float max_adsr_time    = 1.0f;
+constexpr float min_sustain_level = 0.001f;
+
+enum class ParameterType
+{
+    Float,
+    Choice,
+    Bool
+};
 
 /// TODO: Change this to be a float/choice/bool
 struct fm_Parameter
@@ -23,9 +30,9 @@ struct fm_Parameter
     const std::string id;
     const std::string name;
     const std::string unit;
-    const float min = 0.0;
-    const float max = 1.0;
-    const float defaultValue = 0.0;
+    const float min = 0.0f;
+    const float max = 1.0f;
+    const float defaultValue = 0.0f;
     using OpIndex = CASPI::PM::OpIndex;
     const OpIndex opIndex = OpIndex::None;
     const int versionAdded = FM_VERSION; // version = major * 10000 + minor * 100 + patch
